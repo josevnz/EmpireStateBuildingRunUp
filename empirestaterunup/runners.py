@@ -180,7 +180,7 @@ def run_scraper():
     logging.info("Saving results to %s", report_file)
     with RacerLinksScraper(headless=True, debug=False) as link_scraper:
         total = len(link_scraper.racers)
-        logging.info(f"Got {total} racer results")
+        logging.info("Got %s racer results", total)
         with open(report_file, 'w') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=FIELD_NAMES_FOR_SCRAPING, quoting=csv.QUOTE_NONNUMERIC)
             writer.writeheader()

@@ -61,12 +61,17 @@ Interested only in people who completed the 86 floors. So is either full course 
 
 
 class Level(Enum):
+    """
+    Course levels
+    """
     FULL = "Full Course"
     DNF = "DNF"
 
 
-# Fields are sorted by interest
 class RaceFields(Enum):
+    """
+    Race fields, sorted by interest
+    """
     BIB = "bib"
     NAME = "name"
     OVERALL_POSITION = "overall position"

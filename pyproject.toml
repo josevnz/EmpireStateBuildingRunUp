@@ -3,30 +3,49 @@ requires = [
     "setuptools >= 70.1.0",
     "wheel",
     "build",
-    "twine",
     "textual-serve",
-    "textual-dev"
+    "pip"
+
 ]
 build-backend = "setuptools.build_meta"
 
+[project.optional-dependencies]
+lint = [
+    "pylint",
+]
+dev = [
+    "textual-dev",
+    "twine",
+]
+
 [project]
 name = "EmpireStateRunUp"
-version = "0.0.9"
+version = "0.1.0"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
-description = "Collection of scripts to analyze the results of the 2023 Empire State Run Up race"
+description = "Collection of scripts to analyze the results of the Empire State Run Up race"
 readme = "README.md"
-requires-python = ">=3.9"
-keywords = ["running", "race"]
+requires-python = ">=3.11"
+keywords = ["running", "race", "empire state", "tower racing"]
 classifiers = [
     "Environment :: Console",
     "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
     "Intended Audience :: End Users/Desktop",
     "Topic :: Utilities"
 ]
-dynamic = ["dependencies"]
+dependencies = [
+    "pandas==2.2.2",
+    "textual-dev==1.5.1",
+    "textual==0.70.0",
+    "textual-serve==1.0.1",
+    "rich==13.7.1",
+    "numpy==1.26.4",
+    "matplotlib==3.8.3",
+    "selenium==4.15.2"
+]
+license = {file = "LICENSE"}
 [project.scripts]
 esru_scraper = "empirestaterunup.runners:run_scraper"
 esru_csv_cleaner = "empirestaterunup.runners:run_csv_cleaner"
@@ -49,5 +68,4 @@ exclude = ["test*"]
 empirestaterunup = ["*.txt", "*.tcss", "*.csv"]
 images = ["*.png", "*.svg"]
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+

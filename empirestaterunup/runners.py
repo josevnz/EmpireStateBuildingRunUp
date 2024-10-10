@@ -216,15 +216,15 @@ def run_csv_cleaner():
         type=Path,
         help='New report file'
     )
-    OPTIONS = parser.parse_args()
+    options = parser.parse_args()
     try:
-        with open(OPTIONS.report_file, 'w', newline='') as csvfile:
+        with open(options.report_file, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=FIELD_NAMES_FOR_SCRAPING, quoting=csv.QUOTE_NONNUMERIC)
             writer.writeheader()
-            for row in raw_csv_read(OPTIONS.raw_file):
+            for row in raw_csv_read(options.raw_file):
                 try:
                     writer.writerow(row)
-                    if OPTIONS.verbose:
+                    if options.verbose:
                         logging.warning(row)
                 except ValueError as ve:
                     raise ValueError(f"row={row}", ve) from ve

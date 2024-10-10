@@ -58,7 +58,7 @@ You should have some experience in a programming language, my code is written in
 
 In a Nutshell, I want to show that it is possible to do all the above with Open Source technologies, and then this knowledge is also reusable for other projects, not just tower races.
 
-I strongly recommend you [get the source code](https://github.com/josevnz/EmpireStateBuildingRunUp/tree/main/) (It is [Open Source](https://github.com/josevnz/tutorials/tree/main?tab=Apache-2.0-1-ov-file#readme)!). Get your hands dirty, break the scripts, and have fun. You will need git to clone the repository:
+I strongly recommend you [get the source code](https://github.com/josevnz/EmpireStateBuildingRunUp/tree/main/) (It is [Open Source](https://github.com/josevnz/EmpireStateBuildingRunUp/tree/main?tab=Apache-2.0-1-ov-file#readme)!). Get your hands dirty, break the scripts, and have fun. You will need git to clone the repository:
 
 ````shell
 git clone https://github.com/josevnz/EmpireStateBuildingRunUp.git

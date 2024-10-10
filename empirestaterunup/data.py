@@ -4,6 +4,7 @@ author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
 import csv
 import datetime
+import logging
 import math
 import re
 from enum import Enum
@@ -12,6 +13,8 @@ from typing import Iterable, Any, Dict, Tuple, Union, List
 
 import pandas
 from pandas import DataFrame, Series
+
+logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
 """
 Runners started on waves, but for basic analysis we will assume all runners were able to run
@@ -179,7 +182,7 @@ def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                     record[csv_field] = ""
                 yield record
             except IndexError:
-                raise
+                logging.exception("Field: %s", csv_field)
 
 
 def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
@@ -210,7 +213,7 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
     :param raw_file: Yes, copied and pasted all the 8 pages when started the project, before writing a scraper :D
     :return:
     """
-    with open(raw_file, 'r') as file_data:
+    with open(raw_file, 'r', encoding='utf-8') as file_data:
         tk_cnt = 0
         ln_cnt = 0
         record = {}
@@ -312,8 +315,8 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
 
 
 class CourseRecords(Enum):
-    Male = ('Paul Crake', 'Australia', 2003, '9:33')
-    Female = ('Andrea Mayr', 'Austria', 2006, '11:23')
+    MALE = ('Paul Crake', 'Australia', 2003, '9:33')
+    FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
 
 RACE_RESULTS_FIRST_LEVEL = Path(__file__).parent.joinpath("results-first-level-2023.csv")

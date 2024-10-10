@@ -25,26 +25,44 @@ class FastestFilters(Enum):
 
 
 def get_5_number(criteria: str, data: DataFrame) -> DataFrame:
+    """
+    Get the 5 number stats using Pandas
+    """
     return data[criteria].describe()
 
 
 def count_by_age(data: DataFrame) -> tuple[DataFrame, tuple]:
+    """
+    Counts by age
+    """
     return data.groupby(RaceFields.AGE.value)[RaceFields.AGE.value].count(), ('Age', 'Count')
 
 
 def count_by_gender(data: DataFrame) -> tuple[DataFrame, tuple]:
+    """
+    Counts by gender
+    """
     return data.groupby(RaceFields.GENDER.value)[RaceFields.GENDER.value].count(), ('Gender', 'Count')
 
 
 def count_by_wave(data: DataFrame) -> tuple[DataFrame, tuple]:
+    """
+    Counts by wave
+    """
     return data.groupby(RaceFields.WAVE.value)[RaceFields.WAVE.value].count(), ('Wave', 'Count')
 
 
 def dt_to_sorted_dict(df: Union[DataFrame | Series]) -> dict:
+    """
+    Convert to sorted dict
+    """
     return dict(sorted(df.to_dict().items(), key=lambda item: item[1], reverse=True))
 
 
 def get_zscore(df: DataFrame, column: str):
+    """
+    Get Z-score for given column
+    """
     filtered = df[column]
     return filtered.sub(filtered.mean()).div(filtered.std(ddof=0))
 

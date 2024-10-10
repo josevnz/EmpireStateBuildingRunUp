@@ -52,7 +52,7 @@ def run_raw_cleaner():
                     if OPTIONS.verbose:
                         logging.warning(row)
                 except ValueError as ve:
-                    raise ValueError(f"row={row}", ve)
+                    raise ValueError(f"row={row}", ve) from ve
     except KeyboardInterrupt:
         pass
 
@@ -227,6 +227,6 @@ def run_csv_cleaner():
                     if OPTIONS.verbose:
                         logging.warning(row)
                 except ValueError as ve:
-                    raise ValueError(f"row={row}", ve)
+                    raise ValueError(f"row={row}", ve) from ve
     except KeyboardInterrupt:
         pass

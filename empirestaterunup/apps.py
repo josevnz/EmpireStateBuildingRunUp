@@ -125,7 +125,7 @@ class FiveNumberApp(App):
         time_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         country_counts_table = self.get_widget_by_id(id=self.NumbersTables.CountryCounts.name, expect_type=DataTable)
-        countries_counts, min_country_filter, max_country_filter = get_country_counts(FiveNumberApp.DF)
+        countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
         rows = series_to_list_of_tuples(countries_counts)
         for column in ['Country', 'Count']:
             country_counts_table.add_column(column, key=column)
@@ -199,7 +199,7 @@ class RunnerDetailScreen(ModalScreen):
                 pass  # Skip uninteresting columns
             else:
                 row_markdown += f"\n* **{column.title()}:** {detail}"
-        yield MarkdownViewer(f"""# Full Course Race details     
+        yield MarkdownViewer(f"""# Full Course Race details
 ## Runner BIO (BIB: {bibs[0]})
 {row_markdown}
 ## Positions

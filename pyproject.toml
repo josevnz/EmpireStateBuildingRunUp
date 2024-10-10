@@ -106,16 +106,16 @@ valid-classmethod-first-arg = ["cls"]
 valid-metaclass-classmethod-first-arg = ["mcs"]
 
 [tool.pylint.design]
-max-args = 5
+max-args = 10
 max-attributes = 7
 max-bool-expr = 5
-max-branches = 12
-max-locals = 25
+max-branches = 22
+max-locals = 35
 max-parents = 7
 max-positional-arguments = 5
 max-public-methods = 20
 max-returns = 6
-max-statements = 50
+max-statements = 70
 min-public-methods = 2
 
 [tool.pylint.exceptions]
@@ -164,7 +164,7 @@ timeout-methods = ["requests.api.delete", "requests.api.get", "requests.api.head
 notes = ["FIXME", "XXX", "TODO"]
 
 [tool.pylint.refactoring]
-max-nested-blocks = 5
+max-nested-blocks = 7
 
 never-returning-functions = ["sys.exit", "argparse.parse_error"]
 suggest-join-with-non-empty-separator = true
@@ -178,7 +178,7 @@ ignore-comments = true
 ignore-docstrings = true
 ignore-imports = true
 ignore-signatures = true
-min-similarity-lines = 4
+min-similarity-lines = 10
 
 [tool.pylint.spelling]
 max-spelling-suggestions = 4

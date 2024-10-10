@@ -118,7 +118,7 @@ def get_wave_start_time(wave: Waves) -> datetime:
 
 def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
     record = {}
-    with open(raw_file, 'r') as raw_csv_file:
+    with open(raw_file, 'r', encoding='utf-8') as raw_csv_file:
         reader = csv.DictReader(raw_csv_file)
         row: Dict[str, Any]
         for row in reader:
@@ -216,7 +216,7 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
         record = {}
         info_pattern = re.compile("([A-Z]) (\\d+)Bib (\\d*)(.*)")
         info_pattern2 = re.compile("([A-Z]+)Bib (\\d+)-, (.*)")
-        DNF_BIB = [434]
+        dnf_bib = [434]
         for line in file_data:
             try:
                 tk_cnt += 1
@@ -233,7 +233,7 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                         record[RaceFields.GENDER.value] = matcher.group(1).upper()
                         record[RaceFields.AGE.value] = int(matcher.group(2))
                         record[RaceFields.BIB.value] = int(matcher.group(3))
-                        if record[RaceFields.BIB.value] in DNF_BIB:
+                        if record[RaceFields.BIB.value] in dnf_bib:
                             record[
                                 RaceFields.LEVEL.value] = Level.DNF.value
                         else:
@@ -308,7 +308,7 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
 
                     yield record
             except ValueError as ve:
-                raise ValueError(f"ln_cnt={ln_cnt}, tk_cnt={tk_cnt},{record}", ve)
+                raise ValueError(f"ln_cnt={ln_cnt}, tk_cnt={tk_cnt},{record}", ve) from ve
 
 
 class CourseRecords(Enum):
@@ -344,7 +344,7 @@ def load_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
         try:
             df[time_field] = pandas.to_timedelta(df[time_field])
         except ValueError as ve:
-            raise ValueError(f'{time_field}={df[time_field]}', ve)
+            raise ValueError(f'{time_field}={df[time_field]}', ve) from ve
     df['finishtimestamp'] = BASE_RACE_DATETIME + df[RaceFields.TIME.value]
     if remove_dnf:
         df.drop(df[df.level == 'DNF'].index, inplace=True)

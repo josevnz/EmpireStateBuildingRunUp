@@ -98,5 +98,5 @@ _Run your race and have fun_. And believe you can do it.
 
 As for the coding part, it gave me an excuse to brush up my skills using [Python Pandas](https://pandas.pydata.org/), [Textual](https://textual.textualize.io/) and MathPlotLib as well to write a nice Python Wheelhouse you can get from Pypi.
 
-I encourage you to visit the [tutorial site](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/TUTORIAL.md), to get much more details on [how to code](https://github.com/josevnz/tutorials.git) a similar project yourself and also, if you are curious, apply to the lottery for the race and see if you can get it. You'll never know if you don't try.
+I encourage you to visit the [tutorial site](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/TUTORIAL.md), to get much more details on how to code a similar project yourself and also, if you are curious, apply to the lottery for the race and see if you can get it. You'll never know if you don't try.
 

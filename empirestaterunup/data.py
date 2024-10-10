@@ -94,10 +94,10 @@ class RaceFields(Enum):
 FIELD_NAMES = [x.value for x in RaceFields if x != RaceFields.URL]
 FIELD_NAMES_FOR_SCRAPING = [x.value for x in RaceFields]
 FIELD_NAMES_AND_POS: Dict[RaceFields, int] = {}
-pos = 0
+POS = 0
 for field in RaceFields:
-    FIELD_NAMES_AND_POS[field] = pos
-    pos += 1
+    FIELD_NAMES_AND_POS[field] = POS
+    POS += 1
 
 
 def get_wave_from_bib(bib: int) -> Waves:

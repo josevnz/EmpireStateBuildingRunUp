@@ -322,7 +322,7 @@ class Plotter:
         fastest = find_fastest(self.df, FastestFilters.COUNTRY)
         series = self.df[RaceFields.COUNTRY.value].value_counts()
         series.sort_values(inplace=True)
-        fig, ax = plt.subplots(layout='constrained')
+        _, ax = plt.subplots(layout='constrained')
         rects = ax.barh(series.keys(), series.values)
         ax.bar_label(
             rects,
@@ -444,7 +444,7 @@ class BrowserApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        table = self.get_widget_by_id(f'runners', expect_type=DataTable)
+        table = self.get_widget_by_id('runners', expect_type=DataTable)
         table.zebra_stripes = True
         table.cursor_type = 'row'
         columns_raw, rows = df_to_list_of_tuples(self.df)

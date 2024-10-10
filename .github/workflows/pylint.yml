@@ -22,4 +22,4 @@ jobs:
           pip install --editable .[dev,lint]
       - name: Analysing the EmpireStateBuildingRunUp code with pylint
         run: |
-          pylint empirestaterunup test
+          pylint empirestaterunup

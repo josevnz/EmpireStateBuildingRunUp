@@ -1,5 +1,6 @@
+# GitHub action for pylint
 ---
-name: Pylint
+name: Pylint action
 
 on: [push]
 

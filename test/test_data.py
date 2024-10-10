@@ -1,3 +1,6 @@
+"""
+Unit tests for data loading
+"""
 import pprint
 import unittest
 from pathlib import Path
@@ -5,23 +8,28 @@ from pathlib import Path
 from pandas import Series
 
 from empirestaterunup.analyze import better_than_median_waves, find_fastest, FastestFilters
-from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, \
-    df_to_list_of_tuples, load_country_details, lookup_country_by_code, COUNTRY_COLUMNS, get_times, get_positions, \
-    get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, \
-    FIELD_NAMES_AND_POS
-
+from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, df_to_list_of_tuples, load_country_details, lookup_country_by_code, COUNTRY_COLUMNS, get_times, get_positions, get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, FIELD_NAMES_AND_POS
 RAW_COPY_PASTE_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.txt")
 RAW_CSV_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.csv")
 
 
 class DataTestCase(unittest.TestCase):
+    """
+    Uni tests for data loading
+    """
     def test_load_data(self):
+        """
+        Load data
+        """
         data = load_data()
         self.assertIsNotNone(data)
         for row in data:
             self.assertIsNotNone(row)
 
     def test_get_wave_from_bib(self):
+        """
+        Get the wave, based on the BIB
+        """
         self.assertEqual(Waves.ELITE_MEN, get_wave_from_bib(1))
         self.assertEqual(Waves.ELITE_WOMEN, get_wave_from_bib(26))
         self.assertEqual(Waves.PURPLE, get_wave_from_bib(100))
@@ -32,12 +40,21 @@ class DataTestCase(unittest.TestCase):
         self.assertEqual(Waves.BLACK, get_wave_from_bib(600))
 
     def test_get_description_for_wave(self):
+        """
+        Get the description for the wave
+        """
         self.assertEqual(Waves.ELITE_MEN.value[0], get_description_for_wave(Waves.ELITE_MEN))
 
     def test_get_wave_start_time(self):
+        """
+        Get the wave start time
+        """
         self.assertEqual(Waves.ELITE_MEN.value[-1], get_wave_start_time(Waves.ELITE_MEN))
 
     def test_to_list_of_tuples(self):
+        """
+        Conversion
+        """
         data = load_data()
         self.assertIsNotNone(data)
 
@@ -57,6 +74,9 @@ class DataTestCase(unittest.TestCase):
         self.assertEqual(0, len(rows))
 
     def test_series_to_list_of_tuples(self):
+        """
+        Conversion
+        """
         data = load_data()
         self.assertIsNotNone(data)
         countries: Series = data[RaceFields.COUNTRY.value]
@@ -64,19 +84,25 @@ class DataTestCase(unittest.TestCase):
         self.assertIsNotNone(rows)
 
     def test_load_country_details(self):
+        """
+        Load country details
+        """
         data = load_country_details()
         self.assertIsNotNone(data)
         countries = data['name']
         self.assertIsNotNone(countries)
-        for idx, country in data.iterrows():
+        for _, country in data.iterrows():
             self.assertIsNotNone(country.iloc[2])
 
     def test_country_lookup(self):
+        """
+        Lookup country codes
+        """
         run_data = load_data()
         self.assertIsNotNone(run_data)
         country_data = load_country_details()
         self.assertIsNotNone(country_data)
-        header, rows = df_to_list_of_tuples(run_data)
+        _, rows = df_to_list_of_tuples(run_data)
         country_idx = FIELD_NAMES_AND_POS[RaceFields.COUNTRY]
         for row in rows:
             country_code = row[country_idx]
@@ -89,6 +115,9 @@ class DataTestCase(unittest.TestCase):
                 self.assertIsNotNone(country_df[column])
 
     def test_get_times(self):
+        """
+        Get times from the data
+        """
         run_data = load_data()
         self.assertIsNotNone(run_data)
         df = get_times(run_data)
@@ -96,6 +125,9 @@ class DataTestCase(unittest.TestCase):
         self.assertEqual(375, df.shape[0])
 
     def test_get_positions(self):
+        """
+        Get positions from the data
+        """
         run_data = load_data()
         self.assertIsNotNone(run_data)
         df = get_positions(run_data)
@@ -103,6 +135,9 @@ class DataTestCase(unittest.TestCase):
         self.assertEqual(375, df.shape[0])
 
     def test_get_categories(self):
+        """
+        Get categories from the data
+        """
         run_data = load_data()
         self.assertIsNotNone(run_data)
         df = get_categories(run_data)
@@ -110,6 +145,9 @@ class DataTestCase(unittest.TestCase):
         self.assertEqual(375, df.shape[0])
 
     def test_better_than_median_waves(self):
+        """
+        Get better than median waves
+        """
         run_data = load_data()
         self.assertIsNotNone(run_data)
         median_time, wave_series = better_than_median_waves(run_data)
@@ -119,12 +157,18 @@ class DataTestCase(unittest.TestCase):
         print(wave_series)
 
     def test_raw_copy_paste_read(self):
-        clean_data = [record for record in raw_copy_paste_read(RAW_COPY_PASTE_RACE_RESULTS)]
+        """
+        Raw copy paste from data loading, no manipulations
+        """
+        clean_data = list(raw_copy_paste_read(RAW_COPY_PASTE_RACE_RESULTS))
         self.assertIsNotNone(clean_data)
         self.assertEqual(375, len(clean_data))
 
     def test_raw_csv_read(self):
-        clean_data = [record for record in raw_csv_read(RAW_CSV_RACE_RESULTS)]
+        """
+        Read CSV data
+        """
+        clean_data = list(raw_csv_read(RAW_CSV_RACE_RESULTS))
         self.assertIsNotNone(clean_data)
         self.assertEqual(377, len(clean_data))
         for record in clean_data:
@@ -137,6 +181,9 @@ class DataTestCase(unittest.TestCase):
             pprint.pprint(record)
 
     def test_find_fastest(self):
+        """
+        Get the fastest runners on the dataset
+        """
         run_data = load_data()
         self.assertIsNotNone(run_data)
 

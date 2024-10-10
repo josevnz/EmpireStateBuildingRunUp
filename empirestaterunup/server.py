@@ -15,6 +15,9 @@ PORT = 8000
 
 
 def main():
+    """
+    Entry point for CLI application.
+    """
     parser = ArgumentParser(description="Browse user results")
     parser.add_argument(
         "--application",

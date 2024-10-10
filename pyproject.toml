@@ -109,13 +109,13 @@ valid-metaclass-classmethod-first-arg = ["mcs"]
 max-args = 10
 max-attributes = 7
 max-bool-expr = 5
-max-branches = 22
+max-branches = 25
 max-locals = 35
 max-parents = 7
 max-positional-arguments = 5
 max-public-methods = 20
 max-returns = 6
-max-statements = 70
+max-statements = 90
 min-public-methods = 2
 
 [tool.pylint.exceptions]

@@ -109,6 +109,9 @@ for field in RaceFields:
 
 
 def get_wave_from_bib(bib: int) -> Waves:
+    """
+    Get wave from bib
+    """
     for wave in Waves:
         (lower, upper) = wave.value[1]
         if lower <= bib <= upper:
@@ -117,14 +120,23 @@ def get_wave_from_bib(bib: int) -> Waves:
 
 
 def get_description_for_wave(wave: Waves) -> str:
+    """
+    Get description from wave
+    """
     return wave.value[0]
 
 
 def get_wave_start_time(wave: Waves) -> datetime:
+    """
+    Get wave start time
+    """
     return wave.value[2]
 
 
 def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
+    """
+    Get raw CSV
+    """
     record = {}
     with open(raw_file, 'r', encoding='utf-8') as raw_csv_file:
         reader = csv.DictReader(raw_csv_file)
@@ -320,6 +332,9 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
 
 
 class CourseRecords(Enum):
+    """
+    Course records (valid as 2024)
+    """
     MALE = ('Paul Crake', 'Australia', 2003, '9:33')
     FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
@@ -447,6 +462,9 @@ def df_to_list_of_tuples(
 
 
 def series_to_list_of_tuples(series: Series) -> list[Tuple]:
+    """
+    Helper series to list of tuples
+    """
     dct = series.to_dict()
     rows = []
     for key, value in dct.items():
@@ -471,6 +489,9 @@ def load_country_details(data_file: Path = None) -> DataFrame:
 
 
 class CountryColumns(Enum):
+    """
+    Country columns
+    """
     NAME = "name"
     ALPHA_2 = "alpha-2"
     ALPHA_3 = "alpha-3"
@@ -488,6 +509,9 @@ COUNTRY_COLUMNS = [country.value for country in CountryColumns]
 
 
 def lookup_country_by_code(df: DataFrame, three_letter_code: str) -> DataFrame:
+    """
+    Lookup by country
+    """
     if not isinstance(three_letter_code, str):
         raise ValueError(f"Invalid type for three letter country code: '{three_letter_code}'")
     if len(three_letter_code) != 3:
@@ -496,18 +520,30 @@ def lookup_country_by_code(df: DataFrame, three_letter_code: str) -> DataFrame:
 
 
 def get_times(df: DataFrame) -> DataFrame:
+    """
+    Get times from dataframe
+    """
     return df.select_dtypes(include=['timedelta64', 'datetime64'])
 
 
 def get_positions(df: DataFrame) -> DataFrame:
+    """
+    Get positions from dataframe
+    """
     return df.select_dtypes(include=['int64'])
 
 
 def get_categories(df: DataFrame) -> DataFrame:
+    """
+    Get categories from dataframe
+    """
     return df.select_dtypes(include=['object'])
 
 
 def beautify_race_times(time: datetime.timedelta) -> str:
+    """
+    Formatting for provided time
+    """
     mm, ss = divmod(time.total_seconds(), 60)
     hh, mm = divmod(mm, 60)  # Ignore days part as the race doesn't last more than 24 hours
     return f"{int(hh)}:{int(mm)}:{int(ss)}"

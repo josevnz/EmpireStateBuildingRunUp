@@ -42,7 +42,7 @@ This is very true. I was looking first for some software to take the data from t
 
 And every decent website these days forces clients to render the contents in JavaScript. Just try deactivating Javascript and go to one of your favorite websites and you will find out very quickly how fun they are (hint: they're not).
 
-So my best next choice was to manage my web browser (I use Firefox) programmatically, going through every link on the race results website, and saving the contents of the rendered table; [Selenium WebDriver](https://www.selenium.dev/documentation/webdriver/) with a Python extention made it very easy for me and after a few tries I [produced simple code](https://github.com/josevnz/tutorials/blob/main/docs/EmpireStateRunUp/empirestaterunup/scraper.py) that got all the data for this race.
+So my best next choice was to manage my web browser (I use Firefox) programmatically, going through every link on the race results website, and saving the contents of the rendered table; [Selenium WebDriver](https://www.selenium.dev/documentation/webdriver/) with a Python extention made it very easy for me and after a few tries I [produced simple code](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/empirestaterunup/scraper.py) that got all the data for this race.
 
 Why all the data? I wanted to know more about other racers (like country of origin, age, etc.), and now with a local copy in a friendly format I could try to answer my questions
 
@@ -81,13 +81,13 @@ bib                                                                             
 
 A Text User Interface (TUI) is probably the easiest way to show your users quickly and nicely interesting facts about your data.
 
-![A table that shows the Race results, in Python Textual](https://github.com/josevnz/tutorials/blob/main/docs/EmpireStateRunUp/images/esru_browser.png?raw=true)
+![A table that shows the Race results, in Python Textual](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/images/esru_browser.png?raw=true)
 
 As you can imagine, this is an iterative process where you refine your application to answer the most important questions first and to improve your answers. I ended up writing the TUI with Textual, which made the process much easier.
 
 Now a TUI has some limitations, especially with graphics I needed to summarize some important facts; [Mathplotlib](https://matplotlib.org/) let me tackle each one of these visualizations, showing information in ways not possible with the terminal:
 
-![Gender distribution for the racers](https://github.com/josevnz/tutorials/blob/main/docs/EmpireStateRunUp/images/gender_distribution.png?raw=true)
+![Gender distribution for the racers](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/images/gender_distribution.png?raw=true)
 
 
 ## King Kong had a terrible experience in the Empire State, you will have fun instead
@@ -98,5 +98,5 @@ _Run your race and have fun_. And believe you can do it.
 
 As for the coding part, it gave me an excuse to brush up my skills using [Python Pandas](https://pandas.pydata.org/), [Textual](https://textual.textualize.io/) and MathPlotLib as well to write a nice Python Wheelhouse you can get from Pypi.
 
-I encourage you to visit the [tutorial site](https://github.com/josevnz/tutorials/blob/main/docs/EmpireStateRunUp/TUTORIAL.md), to get much more details on [how to code](https://github.com/josevnz/tutorials.git) a similar project yourself and also, if you are curious, apply to the lottery for the race and see if you can get it. You'll never know if you don't try.
+I encourage you to visit the [tutorial site](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/TUTORIAL.md), to get much more details on [how to code](https://github.com/josevnz/tutorials.git) a similar project yourself and also, if you are curious, apply to the lottery for the race and see if you can get it. You'll never know if you don't try.
 

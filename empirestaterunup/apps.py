@@ -319,7 +319,7 @@ class Plotter:
             ax.grid(True)
 
     def plot_country(self):
-        fastest = find_fastest(self.df, FastestFilters.Country)
+        fastest = find_fastest(self.df, FastestFilters.COUNTRY)
         series = self.df[RaceFields.COUNTRY.value].value_counts()
         series.sort_values(inplace=True)
         fig, ax = plt.subplots(layout='constrained')
@@ -350,7 +350,7 @@ class Plotter:
         ax.set_title = "Gender participation"
         ax.set_xlabel('Gender distribution')
         # Legend with the fastest runners by gender
-        fastest = find_fastest(self.df, FastestFilters.Gender)
+        fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
                           series.keys()]
         ax.legend(wedges, fastest_legend,

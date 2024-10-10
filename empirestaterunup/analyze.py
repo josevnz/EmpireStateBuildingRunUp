@@ -5,11 +5,10 @@ author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 import re
 from enum import Enum
 from typing import Union, Tuple, Dict, Any
-
+from datetime import timedelta
 import numpy as np
 import pandas
 from pandas import DataFrame, Categorical, Series, Timedelta
-from datetime import timedelta
 
 from empirestaterunup.data import RaceFields
 
@@ -17,9 +16,12 @@ SUMMARY_METRICS = (RaceFields.AGE.value, RaceFields.TIME.value, RaceFields.PACE.
 
 
 class FastestFilters(Enum):
-    Gender = 0
-    Age = 1
-    Country = 2
+    """
+    Enum to track important filter features
+    """
+    GENDER = 0
+    AGE = 1
+    COUNTRY = 2
 
 
 def get_5_number(criteria: str, data: DataFrame) -> DataFrame:
@@ -39,7 +41,7 @@ def count_by_wave(data: DataFrame) -> tuple[DataFrame, tuple]:
 
 
 def dt_to_sorted_dict(df: Union[DataFrame | Series]) -> dict:
-    return {k: v for k, v in sorted(df.to_dict().items(), key=lambda item: item[1], reverse=True)}
+    return dict(sorted(df.to_dict().items(), key=lambda item: item[1], reverse=True))
 
 
 def get_zscore(df: DataFrame, column: str):
@@ -110,7 +112,7 @@ def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Dict[str,
     :return Dictionary with the fastest runners, includes criteria and value
     """
     results = {}
-    if criteria == FastestFilters.Age:
+    if criteria == FastestFilters.AGE:
         age_bucket, _ = age_bins(df)
         buckets = age_bucket.unique()
         for bucket in buckets:
@@ -128,7 +130,7 @@ def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Dict[str,
                     "age": age,
                     "time": fastest_time
                 }
-    elif criteria == FastestFilters.Gender:
+    elif criteria == FastestFilters.GENDER:
         genders = df[RaceFields.GENDER.value].unique()
         for gender in genders:
             runners_by_gender = df[(df[RaceFields.GENDER.value] == gender)]
@@ -140,7 +142,7 @@ def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Dict[str,
                 "name": name,
                 "time": fastest_time
             }
-    elif FastestFilters.Country:
+    elif FastestFilters.COUNTRY:
         countries = df[RaceFields.COUNTRY.value].unique()
         for country in countries:
             runners_by_country = df[(df[RaceFields.COUNTRY.value] == country)]

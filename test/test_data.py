@@ -187,17 +187,17 @@ class DataTestCase(unittest.TestCase):
         run_data = load_data()
         self.assertIsNotNone(run_data)
 
-        fastest = find_fastest(run_data, FastestFilters.Gender)
+        fastest = find_fastest(run_data, FastestFilters.GENDER)
         self.assertIsNotNone(fastest)
         self.assertTrue(fastest)
         self.assertEqual(3, len(fastest))
 
-        fastest = find_fastest(run_data, FastestFilters.Country)
+        fastest = find_fastest(run_data, FastestFilters.COUNTRY)
         self.assertIsNotNone(fastest)
         self.assertTrue(fastest)
         self.assertEqual(18, len(fastest))
 
-        fastest = find_fastest(run_data, FastestFilters.Age)
+        fastest = find_fastest(run_data, FastestFilters.AGE)
         self.assertIsNotNone(fastest)
         self.assertTrue(fastest)
         self.assertEqual(7, len(fastest))

@@ -4,6 +4,7 @@ Common logic to scrape race results
 import pprint
 import re
 import subprocess
+from enum import Enum
 from time import sleep
 from typing import Any, Dict
 
@@ -16,14 +17,23 @@ from selenium.webdriver.support import expected_conditions
 
 from empirestaterunup.data import RaceFields, Level
 
-EMPIRE_STATE_2013_RACE_RESULTS = "https://www.athlinks.com/event/382111/results/Event/1062909/Course/2407855/Results"
+
+class YearResults(Enum):
+    RESULTS_2013 = "https://www.athlinks.com/event/382111/results/Event/1062909/Course/2407855/Results"
+    RESULTS_2014 = "https://www.athlinks.com/event/382111/results/Event/1093108/Course/2524389/Results"
 
 
 class RacerLinksScraper:
     """
     Class that parses HTML from the results website to get race results
     """
-    def __init__(self, headless: bool = True, load_wait: int = 5, debug: bool = False):
+    def __init__(
+            self,
+            headless: bool = True,
+            load_wait: int = 5,
+            debug: bool = False,
+            year: YearResults = YearResults.RESULTS_2013,
+    ):
         """
         Constructor
         """
@@ -33,7 +43,7 @@ class RacerLinksScraper:
             options.add_argument("--headless")
         self.driver = webdriver.Firefox(options=options)
         self.load_wait = load_wait
-        self.driver.get(EMPIRE_STATE_2013_RACE_RESULTS)
+        self.driver.get(year.value)
         sleep(self.load_wait)
         self.racers = {}
         self.debug = debug

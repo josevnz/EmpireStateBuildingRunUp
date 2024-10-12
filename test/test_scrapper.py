@@ -18,7 +18,7 @@ class RacerLinksScraperTestCase(unittest.TestCase):
     """
     def test_link_scraper(self):
         """
-        Scrappe links
+        Scrape links
         """
         with RacerLinksScraper(headless=True, debug=False) as esc:
             self.assertIsNotNone(esc)

@@ -20,10 +20,20 @@ logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=lo
 Runners started on waves, but for basic analysis we will assume all runners were able to run
 at the same time.
 """
-BASE_RACE_DATETIME = datetime.datetime(
+BASE_RACE_DATETIME_2023 = datetime.datetime(
     year=2023,
     month=9,
     day=4,
+    hour=20,
+    minute=0,
+    second=0,
+    microsecond=0
+)
+
+BASE_RACE_DATETIME_2024 = datetime.datetime(
+    year=2024,
+    month=9,
+    day=9,
     hour=20,
     minute=0,
     second=0,
@@ -40,19 +50,19 @@ class Waves(Enum):
     https://runsignup.com/Race/EmpireStateBuildingRunUp/Page-5
     I guessed who went on which category, based on the BIB numbers I saw that day
     """
-    ELITE_MEN = ["Elite Men", [1, 25], BASE_RACE_DATETIME]
-    ELITE_WOMEN = ["Elite Women", [26, 49], BASE_RACE_DATETIME + datetime.timedelta(minutes=2)]
-    PURPLE = ["Specialty", [100, 199], BASE_RACE_DATETIME + datetime.timedelta(minutes=10)]
-    GREEN = ["Sponsors", [200, 299], BASE_RACE_DATETIME + datetime.timedelta(minutes=20)]
+    ELITE_MEN = ["Elite Men", [1, 25], BASE_RACE_DATETIME_2023]
+    ELITE_WOMEN = ["Elite Women", [26, 49], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=2)]
+    PURPLE = ["Specialty", [100, 199], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=10)]
+    GREEN = ["Sponsors", [200, 299], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=20)]
     """
     The date people applied for the lottery determined the colors?. Let's assume that
     General Lottery Open: 7/17 9AM- 7/28 11:59PM
     General Lottery Draw Date: 8/1
     """
-    ORANGE = ["Tenants", [300, 399], BASE_RACE_DATETIME + datetime.timedelta(minutes=30)]
-    GREY = ["General 1", [400, 499], BASE_RACE_DATETIME + datetime.timedelta(minutes=40)]
-    GOLD = ["General 2", [500, 599], BASE_RACE_DATETIME + datetime.timedelta(minutes=50)]
-    BLACK = ["General 3", [600, 699], BASE_RACE_DATETIME + datetime.timedelta(minutes=60)]
+    ORANGE = ["Tenants", [300, 399], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=30)]
+    GREY = ["General 1", [400, 499], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=40)]
+    GOLD = ["General 2", [500, 599], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=50)]
+    BLACK = ["General 3", [600, 699], BASE_RACE_DATETIME_2023 + datetime.timedelta(minutes=60)]
 
 
 """
@@ -94,7 +104,6 @@ class RaceFields(Enum):
     SIXTY_FIVE_FLOOR_DIVISION_POSITION = "65th floor division position"
     SIXTY_FIVE_FLOOR_PACE = '65th floor pace'
     SIXTY_FIVE_FLOOR_TIME = '65th floor time'
-    WAVE = "wave"
     LEVEL = "level"
     URL = "url"
 
@@ -106,31 +115,6 @@ POS = 0
 for field in RaceFields:
     FIELD_NAMES_AND_POS[field] = POS
     POS += 1
-
-
-def get_wave_from_bib(bib: int) -> Waves:
-    """
-    Get wave from bib
-    """
-    for wave in Waves:
-        (lower, upper) = wave.value[1]
-        if lower <= bib <= upper:
-            return wave
-    return Waves.BLACK
-
-
-def get_description_for_wave(wave: Waves) -> str:
-    """
-    Get description from wave
-    """
-    return wave.value[0]
-
-
-def get_wave_start_time(wave: Waves) -> datetime:
-    """
-    Get wave start time
-    """
-    return wave.value[2]
 
 
 def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
@@ -165,8 +149,6 @@ def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                             record[csv_field] = int(column_val)
                         except ValueError:
                             record[csv_field] = math.nan
-                    elif csv_field == RaceFields.WAVE.value:
-                        record[csv_field] = get_description_for_wave(get_wave_from_bib(bib)).upper()
                     elif csv_field in [
                         RaceFields.GENDER.value,
                         RaceFields.COUNTRY.value
@@ -275,7 +257,6 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                             record[RaceFields.CITY.value] = ""
                             record[RaceFields.STATE.value] = ""
                             record[RaceFields.COUNTRY.value] = ""
-                        record[RaceFields.WAVE.value] = get_description_for_wave(get_wave_from_bib(record[RaceFields.BIB.value])).upper()
                     else:
                         matcher = info_pattern2.search(line.strip())
                         if matcher:
@@ -339,12 +320,21 @@ class CourseRecords(Enum):
     FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
 
-RACE_RESULTS_FIRST_LEVEL = Path(__file__).parent.joinpath("results-first-level-2023.csv")
-RACE_RESULTS_FULL_LEVEL = Path(__file__).parent.joinpath("results-full-level-2023.csv")
+RACE_RESULTS_FIRST_LEVEL_2023 = Path(__file__).parent.joinpath("results-first-level-2023.csv")
+RACE_RESULTS_FULL_LEVEL_2023 = Path(__file__).parent.joinpath("results-full-level-2023.csv")
+RACE_RESULTS_FULL_LEVEL_2024 = Path(__file__).parent.joinpath("results-full-level-2024.csv")
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.csv")
 
 
-def load_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
+class YearResults(Enum):
+    """
+    Race is run every year in October
+    """
+    RESULTS_2023 = "https://www.athlinks.com/event/382111/results/Event/1062909/Course/2407855/Results"
+    RESULTS_2024 = "https://www.athlinks.com/event/382111/results/Event/1093108/Course/2524389/Results"
+
+
+def load_data(data_file: Path = None, remove_dnf: bool = True, year: YearResults = YearResults.RESULTS_2023) -> DataFrame:
     """
     * The code remove by default the DNF runners to avoid distortion on the results.
     * Replace unknown/ nan values with the median, to make analysis easier and avoid distortions
@@ -352,7 +342,7 @@ def load_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
     if data_file:
         def_file = data_file
     else:
-        def_file = RACE_RESULTS_FULL_LEVEL
+        def_file = RACE_RESULTS_FULL_LEVEL_2023
     df = pandas.read_csv(
         def_file
     )
@@ -368,7 +358,13 @@ def load_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
             df[time_field] = pandas.to_timedelta(df[time_field])
         except ValueError as ve:
             raise ValueError(f'{time_field}={df[time_field]}', ve) from ve
-    df['finishtimestamp'] = BASE_RACE_DATETIME + df[RaceFields.TIME.value]
+    if year == YearResults.RESULTS_2023:
+        start = BASE_RACE_DATETIME_2023
+    elif year == YearResults.RESULTS_2024:
+        start = BASE_RACE_DATETIME_2024
+    else:
+        raise NotImplemented(f"Not supported: {year.name}")
+    df['finishtimestamp'] = start + df[RaceFields.TIME.value]
     if remove_dnf:
         df.drop(df[df.level == 'DNF'].index, inplace=True)
 

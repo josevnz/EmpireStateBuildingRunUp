@@ -5,7 +5,7 @@ import logging
 import pprint
 import unittest
 
-from empirestaterunup.data import RaceFields
+from empirestaterunup.data import RaceFields, YearResults
 from empirestaterunup.scraper import RacerLinksScraper, RacerDetailsScraper
 
 logger = logging.getLogger('selenium')
@@ -16,11 +16,20 @@ class RacerLinksScraperTestCase(unittest.TestCase):
     """
     Run different unit tests
     """
-    def test_link_scraper(self):
+    def test_link_scraper_2023(self):
         """
-        Scrape links
+        Scrape links for 2023. This test takes a while to run
         """
-        with RacerLinksScraper(headless=True, debug=False) as esc:
+        with RacerLinksScraper(headless=True, debug=False, year=YearResults.RESULTS_2023) as esc:
+            self.assertIsNotNone(esc)
+            self.assertEqual(377, len(esc.racers))
+            self.assertEqual(377, len(esc.rank_to_bib))
+
+    def test_link_scraper_2024(self):
+        """
+        Scrape links for 2024. This test takes a while to run
+        """
+        with RacerLinksScraper(headless=True, debug=False, year=YearResults.RESULTS_2024) as esc:
             self.assertIsNotNone(esc)
             self.assertEqual(377, len(esc.racers))
             self.assertEqual(377, len(esc.rank_to_bib))

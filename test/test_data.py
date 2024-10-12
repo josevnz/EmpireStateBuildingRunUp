@@ -7,8 +7,8 @@ from pathlib import Path
 
 from pandas import Series
 
-from empirestaterunup.analyze import better_than_median_waves, find_fastest, FastestFilters
-from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, df_to_list_of_tuples, load_country_details, lookup_country_by_code, COUNTRY_COLUMNS, get_times, get_positions, get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, FIELD_NAMES_AND_POS
+from empirestaterunup.analyze import better_than_median, find_fastest, FastestFilters
+from empirestaterunup.data import load_data, Waves, df_to_list_of_tuples, load_country_details, lookup_country_by_code, COUNTRY_COLUMNS, get_times, get_positions, get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, FIELD_NAMES_AND_POS
 RAW_COPY_PASTE_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.txt")
 RAW_CSV_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.csv")
 
@@ -25,31 +25,6 @@ class DataTestCase(unittest.TestCase):
         self.assertIsNotNone(data)
         for row in data:
             self.assertIsNotNone(row)
-
-    def test_get_wave_from_bib(self):
-        """
-        Get the wave, based on the BIB
-        """
-        self.assertEqual(Waves.ELITE_MEN, get_wave_from_bib(1))
-        self.assertEqual(Waves.ELITE_WOMEN, get_wave_from_bib(26))
-        self.assertEqual(Waves.PURPLE, get_wave_from_bib(100))
-        self.assertEqual(Waves.GREEN, get_wave_from_bib(200))
-        self.assertEqual(Waves.ORANGE, get_wave_from_bib(300))
-        self.assertEqual(Waves.GREY, get_wave_from_bib(400))
-        self.assertEqual(Waves.GOLD, get_wave_from_bib(500))
-        self.assertEqual(Waves.BLACK, get_wave_from_bib(600))
-
-    def test_get_description_for_wave(self):
-        """
-        Get the description for the wave
-        """
-        self.assertEqual(Waves.ELITE_MEN.value[0], get_description_for_wave(Waves.ELITE_MEN))
-
-    def test_get_wave_start_time(self):
-        """
-        Get the wave start time
-        """
-        self.assertEqual(Waves.ELITE_MEN.value[-1], get_wave_start_time(Waves.ELITE_MEN))
 
     def test_to_list_of_tuples(self):
         """
@@ -144,17 +119,15 @@ class DataTestCase(unittest.TestCase):
         self.assertIsNotNone(df)
         self.assertEqual(375, df.shape[0])
 
-    def test_better_than_median_waves(self):
+    def test_better_than_median(self):
         """
         Get better than median waves
         """
         run_data = load_data()
         self.assertIsNotNone(run_data)
-        median_time, wave_series = better_than_median_waves(run_data)
+        median_time = better_than_median(run_data)
         self.assertIsNotNone(median_time)
-        self.assertEqual(43, wave_series.iloc[0])
         print(median_time)
-        print(wave_series)
 
     def test_raw_copy_paste_read(self):
         """

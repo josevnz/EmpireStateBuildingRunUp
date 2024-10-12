@@ -20,7 +20,7 @@ Sufficient to say I was nervous as this was not a Marathon (I Ran the New York C
 
 I'm not the first one to tackle a tower race and there are plenty of tips and resources online, I took advantage of that. Also stayed consistent with my regular training, so I ended up making some adaptations to be ready for the challenges of this type of race.
 
-One problem was not solved and it was the lack of a nice tool to analyze the race results. Race organizers collected the race results and showed them on their sites with minimal analysis, and none of them offered a way to download the data for more complex processing.
+One problem was not solved, and it was the lack of a nice tool to analyze the race results. Race organizers collected the race results and showed them on their sites with minimal analysis, and none of them offered a way to download the data for more complex processing.
 
 That's where Open Source comes into play. I'm a DevOps and I love to automate things, so my plan to solve this issue was like this:
 
@@ -100,3 +100,8 @@ As for the coding part, it gave me an excuse to brush up my skills using [Python
 
 I encourage you to visit the [tutorial site](https://github.com/josevnz/EmpireStateBuildingRunUp/blob/main/TUTORIAL.md), to get much more details on how to code a similar project yourself and also, if you are curious, apply to the lottery for the race and see if you can get it. You'll never know if you don't try.
 
+## What data is missing
+
+I decided to exclude 2 pieces of information:
+1) Gun time: It doesn't add much in my opinion fort analysis, except maybe how well the organizers estimated the number of participants. I may include this in a future edition...
+2) Wave: The criteria and number of waves changes depending on the number of participants every year. Criteria for selection is not public. For that reason I remove all the code that dealt with waves. Sorry, not sorry.

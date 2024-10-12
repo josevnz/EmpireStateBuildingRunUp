@@ -4,7 +4,6 @@ Common logic to scrape race results
 import pprint
 import re
 import subprocess
-from enum import Enum
 from time import sleep
 from typing import Any, Dict
 
@@ -15,12 +14,7 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
-from empirestaterunup.data import RaceFields, Level
-
-
-class YearResults(Enum):
-    RESULTS_2013 = "https://www.athlinks.com/event/382111/results/Event/1062909/Course/2407855/Results"
-    RESULTS_2014 = "https://www.athlinks.com/event/382111/results/Event/1093108/Course/2524389/Results"
+from empirestaterunup.data import RaceFields, Level, YearResults
 
 
 class RacerLinksScraper:
@@ -32,7 +26,7 @@ class RacerLinksScraper:
             headless: bool = True,
             load_wait: int = 5,
             debug: bool = False,
-            year: YearResults = YearResults.RESULTS_2013,
+            year: YearResults = YearResults.RESULTS_2023,
     ):
         """
         Constructor
@@ -59,7 +53,7 @@ class RacerLinksScraper:
         """
         try:
             # 8 pages, first + 7 extra
-            if self.year == YearResults.RESULTS_2013:
+            if self.year == YearResults.RESULTS_2023:
                 self.__get_racer_details__()
                 self.__click__(level=6)
                 self.__get_racer_details__()
@@ -76,7 +70,7 @@ class RacerLinksScraper:
                 self.__click__(level=7)
                 self.__get_racer_details__()
             # 12 pages, first + 11 extra
-            elif self.year == YearResults.RESULTS_2014:
+            elif self.year == YearResults.RESULTS_2024:
                 self.__get_racer_details__()
                 self.__click__(level=6)
                 self.__get_racer_details__()

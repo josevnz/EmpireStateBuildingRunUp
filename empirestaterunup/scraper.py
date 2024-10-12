@@ -203,6 +203,10 @@ class RacerLinksScraper:
             pprint.pprint(self.rank_to_bib)
 
     def __click__(self, level: int) -> Any:
+        """
+        How deep the button is? Depends on the rendered JavaScript
+        That's wny we have 'level'
+        """
         button = WebDriverWait(self.driver, 20).until(
             expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, f"div:nth-child({level}) > button")))
         # Bug on Selenium, trigger click with Javascript

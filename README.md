@@ -6,11 +6,20 @@
 
 ![ESRU browser](images/esru_browser.png)
 
-
-
 Hello. I wrote an application to analyse the results of the 'Empire State Run Up', 2013 edition, after I ran the race. 
 
 Here you will find my code.
+
+## Supported years race result
+
+I pre-processed the race results for easy viewing and analysis. 
+
+### Years
+
+* 2023
+* 2024
+
+If you can point me out to previous years race results, I can try to include them  here.
 
 ## If you just want to install it
 

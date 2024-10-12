@@ -20,8 +20,6 @@ See the previous section called 'Packaging', and then install it on your virtual
 python3 -m venv ~/virtualenv/EmpireStateRunUp
 . ~/virtualenv/EmpireStateRunUp/bin/activate
 pip install --upgrade pip
-pip install --upgrade build
-pip install --upgrade wheel
 python -m build .
 pip install --upgrade dist/EmpireStateRunUp-0.0.1-py3-none-any.whl
 ```
@@ -43,9 +41,7 @@ If you want to learn more about these programs, please grab a cup of coffe and r
 python3 -m venv ~/virtualenv/EmpireStateRunUp
 . ~/virtualenv/EmpireStateRunUp/bin/activate
 pip install --upgrade pip
-pip install --upgrade build
-pip install --upgrade wheel
-pip install --editable .
+pip install --editable .[dev,lint]
 ```
 
 #### Modifying the layout without restarting the apps

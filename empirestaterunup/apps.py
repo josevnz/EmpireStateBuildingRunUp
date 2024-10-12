@@ -8,7 +8,7 @@ from functools import partial
 from pathlib import Path
 from typing import Type, Any, List
 
-from matplotlib import colors
+# from matplotlib import colors
 from pandas import DataFrame, Timedelta
 from rich.style import Style
 from rich.text import Text
@@ -30,27 +30,39 @@ from empirestaterunup.data import load_data, df_to_list_of_tuples, load_country_
 
 
 class FiveNumberApp(App):
+    """
+    Application to display 5 numbers
+    """
     DF: DataFrame = None
     BINDINGS = [("q", "quit_app", "Quit")]
     FIVE_NUMBER_FIELDS = ('count', 'mean', 'std', 'min', 'max', '25%', '50%', '75%')
     CSS_PATH = "five_numbers.tcss"
 
     class NumbersTables(Enum):
-        Summary = 'Summary'
-        CountByAge = 'Count By Age'
-        WaveBucket = 'Wave Bucket'
-        GenderBucket = 'Gender Bucket'
-        AgeBucket = 'Age Bucket'
-        TimeBucket = 'Time Bucket'
-        CountryCounts = 'Country Counts'
-        BetterThanAverage = 'Better than average Wave Counts'
+        """
+        Important metrics for 5 number application
+        """
+        SUMMARY = 'Summary'
+        COUNT_BY_AGE = 'Count By Age'
+        WAVE_BUCKET = 'Wave Bucket'
+        GENDER_BUCKET = 'Gender Bucket'
+        AGE_BUCKET = 'Age Bucket'
+        TIME_BUCKET = 'Time Bucket'
+        COUNTRY_COUNTS = 'Country Counts'
+        BETTER_THAN_AVERAGE = 'Better than average Wave Counts'
 
     ENABLE_COMMAND_PALETTE = False
 
     def action_quit_app(self):
+        """
+        Exit handler
+        """
         self.exit(0)
 
     def compose(self) -> ComposeResult:
+        """
+        UI component layout
+        """
         yield Header(show_clock=True)
         for table_id in FiveNumberApp.NumbersTables:
             table = DataTable(id=table_id.name)
@@ -63,8 +75,10 @@ class FiveNumberApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-
-        wave_table = self.get_widget_by_id(id=self.NumbersTables.BetterThanAverage.name, expect_type=DataTable)
+        """
+        Initialize component contents
+        """
+        wave_table = self.get_widget_by_id(id=self.NumbersTables.BETTER_THAN_AVERAGE.name, expect_type=DataTable)
         median_run_time, wave_series = better_than_median_waves(FiveNumberApp.DF)
         median_run_time_in_minutes = f"{median_run_time.total_seconds()/60.0:.2f} minutes"
         rows = series_to_list_of_tuples(wave_series)
@@ -73,7 +87,7 @@ class FiveNumberApp(App):
         wave_table.add_rows(rows)
         wave_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        summary_table = self.get_widget_by_id(id=self.NumbersTables.Summary.name, expect_type=DataTable)
+        summary_table = self.get_widget_by_id(id=self.NumbersTables.SUMMARY.name, expect_type=DataTable)
         columns = [x.title() for x in FiveNumberApp.FIVE_NUMBER_FIELDS]
         columns.insert(0, 'Summary')
         summary_table.add_columns(*columns)
@@ -88,35 +102,35 @@ class FiveNumberApp(App):
             summary_table.add_row(*rows)
         summary_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        age_table = self.get_widget_by_id(id=self.NumbersTables.CountByAge.name, expect_type=DataTable)
+        age_table = self.get_widget_by_id(id=self.NumbersTables.COUNT_BY_AGE.name, expect_type=DataTable)
         adf, age_header = count_by_age(FiveNumberApp.DF)
         for column in age_header:
             age_table.add_column(column, key=column)
         age_table.add_rows(dt_to_sorted_dict(adf).items())
         age_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        gender_table = self.get_widget_by_id(id=self.NumbersTables.GenderBucket.name, expect_type=DataTable)
+        gender_table = self.get_widget_by_id(id=self.NumbersTables.GENDER_BUCKET.name, expect_type=DataTable)
         gdf, gender_header = count_by_gender(FiveNumberApp.DF)
         for column in gender_header:
             gender_table.add_column(column, key=column)
         gender_table.add_rows(dt_to_sorted_dict(gdf).items())
         gender_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        wave_table = self.get_widget_by_id(id=self.NumbersTables.WaveBucket.name, expect_type=DataTable)
+        wave_table = self.get_widget_by_id(id=self.NumbersTables.WAVE_BUCKET.name, expect_type=DataTable)
         wdf, wave_header = count_by_wave(FiveNumberApp.DF)
         for column in wave_header:
             wave_table.add_column(column, key=column)
         wave_table.add_rows(dt_to_sorted_dict(wdf).items())
         wave_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        age_bucket_table = self.get_widget_by_id(id=self.NumbersTables.AgeBucket.name, expect_type=DataTable)
+        age_bucket_table = self.get_widget_by_id(id=self.NumbersTables.AGE_BUCKET.name, expect_type=DataTable)
         age_categories, age_cols_head = age_bins(FiveNumberApp.DF)
         for column in age_cols_head:
             age_bucket_table.add_column(column, key=column)
         age_bucket_table.add_rows(dt_to_sorted_dict(age_categories.value_counts()).items())
         age_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        time_bucket_table = self.get_widget_by_id(id=self.NumbersTables.TimeBucket.name, expect_type=DataTable)
+        time_bucket_table = self.get_widget_by_id(id=self.NumbersTables.TIME_BUCKET.name, expect_type=DataTable)
         time_categories, time_cols_head = time_bins(FiveNumberApp.DF)
         for column in time_cols_head:
             time_bucket_table.add_column(column, key=column)
@@ -124,8 +138,8 @@ class FiveNumberApp(App):
         time_bucket_table.add_rows(times)
         time_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
-        country_counts_table = self.get_widget_by_id(id=self.NumbersTables.CountryCounts.name, expect_type=DataTable)
-        countries_counts, min_country_filter, max_country_filter = get_country_counts(FiveNumberApp.DF)
+        country_counts_table = self.get_widget_by_id(id=self.NumbersTables.COUNTRY_COUNTS.name, expect_type=DataTable)
+        countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
         rows = series_to_list_of_tuples(countries_counts)
         for column in ['Country', 'Count']:
             country_counts_table.add_column(column, key=column)
@@ -140,12 +154,18 @@ class FiveNumberApp(App):
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
+        """
+        Handler when user clicks the table header
+        """
         table = event.data_table
         if table.id != 'Summary':  # Not supported yet
             table.sort(event.column_key)
 
 
 class RunnerDetailScreen(ModalScreen):
+    """
+    Modal runner detail screen
+    """
     ENABLE_COMMAND_PALETTE = False
     CSS_PATH = "runner_details.tcss"
 
@@ -158,6 +178,9 @@ class RunnerDetailScreen(ModalScreen):
             df: DataFrame = None,
             country_df: DataFrame = None
     ):
+        """
+        Constructor
+        """
         super().__init__(name, ident, classes)
         self.row = row
         self.df = df
@@ -167,6 +190,9 @@ class RunnerDetailScreen(ModalScreen):
             self.country_df = country_df
 
     def compose(self) -> ComposeResult:
+        """
+        UI element initial layout
+        """
         bib_idx = FIELD_NAMES_AND_POS[RaceFields.BIB]
         bibs = [self.row[bib_idx]]
         columns, details = df_to_list_of_tuples(self.df, bibs)
@@ -199,7 +225,7 @@ class RunnerDetailScreen(ModalScreen):
                 pass  # Skip uninteresting columns
             else:
                 row_markdown += f"\n* **{column.title()}:** {detail}"
-        yield MarkdownViewer(f"""# Full Course Race details     
+        yield MarkdownViewer(f"""# Full Course Race details
 ## Runner BIO (BIB: {bibs[0]})
 {row_markdown}
 ## Positions
@@ -223,10 +249,16 @@ class RunnerDetailScreen(ModalScreen):
 
     @on(Button.Pressed, "#close")
     def on_button_pressed(self, _) -> None:
+        """
+        Handler on button pressed
+        """
         self.app.pop_screen()
 
 
 class OutlierApp(App):
+    """
+    Outlier application
+    """
     DF: DataFrame = None
     BINDINGS = [
         ("q", "quit_app", "Quit"),
@@ -235,10 +267,15 @@ class OutlierApp(App):
     ENABLE_COMMAND_PALETTE = False
 
     def action_quit_app(self):
+        """
+        Exit handler
+        """
         self.exit(0)
 
     def compose(self) -> ComposeResult:
-
+        """
+        Layout UI elements
+        """
         yield Header(show_clock=True)
         for column_name in SUMMARY_METRICS:
             table = DataTable(id=f'{column_name}_outlier')
@@ -256,6 +293,9 @@ class OutlierApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
+        """
+        Initialize UI elements
+        """
         for column in SUMMARY_METRICS:
             table = self.get_widget_by_id(f'{column}_outlier', expect_type=DataTable)
             columns = [x.title() for x in ['bib', column]]
@@ -278,11 +318,17 @@ class OutlierApp(App):
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
+        """
+        Handle table click events
+        """
         table = event.data_table
         table.sort(event.column_key)
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
+        """
+        Handle row clicked events
+        """
         table = event.data_table
         row = table.get_row(event.row_key)
         runner_detail = RunnerDetailScreen(df=OutlierApp.DF, row=row)
@@ -290,14 +336,23 @@ class OutlierApp(App):
 
 
 class Plotter:
-
+    """
+    Plot different metrics
+    """
     def __init__(self, data_file: Path = None):
+        """
+        Constructor, load data from file using helper.
+        """
         self.df = load_data(data_file)
 
     def plot_age(self, gtype: str):
+        """
+        Plot age.
+        Borrowed coloring recipe for histogram from Matplotlib documentation
+        """
         if gtype == 'box':
             series = self.df[RaceFields.AGE.value]
-            fig, ax = plt.subplots(layout='constrained')
+            _, ax = plt.subplots(layout='constrained')
             ax.boxplot(series)
             ax.set_title("Age details")
             ax.set_ylabel('Years')
@@ -305,24 +360,26 @@ class Plotter:
             ax.grid(True)
         elif gtype == 'hist':
             series = self.df[RaceFields.AGE.value]
-            fig, ax = plt.subplots(layout='constrained')
-            n, bins, patches = ax.hist(series, density=False, alpha=0.75)
-            # Borrowed coloring recipe for histogram from Matplotlib documentation
-            fractions = n / n.max()
-            norm = colors.Normalize(fractions.min(), fractions.max())
-            for frac, patch in zip(fractions, patches):
-                color = plt.cm.viridis(norm(frac))
-                patch.set_facecolor(color)
+            _, ax = plt.subplots(layout='constrained')
+            _, bins, _ = ax.hist(series, density=False, alpha=0.75)
+            # fractions = n / n.max()
+            # norm = colors.Normalize(fractions.min(), fractions.max())
+            # for frac, patch in zip(fractions, patches):
+            #    color = plt.cm.viridis(norm(frac))
+            #    patch.set_facecolor(color)
             ax.set_xlabel('Age [years]')
             ax.set_ylabel('Count')
             ax.set_title(f'Age details for {series.shape[0]} racers\nBins={len(bins)}')
             ax.grid(True)
 
     def plot_country(self):
-        fastest = find_fastest(self.df, FastestFilters.Country)
+        """
+        Plot country details
+        """
+        fastest = find_fastest(self.df, FastestFilters.COUNTRY)
         series = self.df[RaceFields.COUNTRY.value].value_counts()
         series.sort_values(inplace=True)
-        fig, ax = plt.subplots(layout='constrained')
+        _, ax = plt.subplots(layout='constrained')
         rects = ax.barh(series.keys(), series.values)
         ax.bar_label(
             rects,
@@ -337,9 +394,12 @@ class Plotter:
         ax.set_xlabel('Count per country')
 
     def plot_gender(self):
+        """
+        Plot gender details
+        """
         series = self.df[RaceFields.GENDER.value].value_counts()
-        fig, ax = plt.subplots(layout='constrained')
-        wedges, texts, auto_texts = ax.pie(
+        _, ax = plt.subplots(layout='constrained')
+        wedges, _, _ = ax.pie(
             series.values,
             labels=series.keys(),
             autopct="%%%.2f",
@@ -350,7 +410,7 @@ class Plotter:
         ax.set_title = "Gender participation"
         ax.set_xlabel('Gender distribution')
         # Legend with the fastest runners by gender
-        fastest = find_fastest(self.df, FastestFilters.Gender)
+        fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
                           series.keys()]
         ax.legend(wedges, fastest_legend,
@@ -360,16 +420,28 @@ class Plotter:
 
 
 class BrowserAppCommand(Provider):
+    """
+    Racer browser details on the Command palette
+    """
 
     def __init__(self, screen: Screen[Any], match_style: Style | None = None):
+        """
+        Constructor, load data from file using helper.
+        """
         super().__init__(screen, match_style)
         self.table = None
 
     async def startup(self) -> None:
+        """
+        Data loading on the palette startup
+        """
         browser_app = self.app
         self.table = browser_app.query(DataTable).first()
 
     async def search(self, query: str) -> Hit:
+        """
+        Return hits based on a user query
+        """
         matcher = self.matcher(query)
         browser_app = self.screen.app
         assert isinstance(browser_app, BrowserApp)
@@ -396,6 +468,9 @@ class BrowserAppCommand(Provider):
 
 
 class BrowserApp(App):
+    """
+    User browser detail application
+    """
     BINDINGS = [("q", "quit_app", "Quit")]
     CSS_PATH = "browser.tcss"
     ENABLE_COMMAND_PALETTE = True
@@ -409,6 +484,9 @@ class BrowserApp(App):
             country_data: DataFrame = None,
             df: DataFrame = None
     ):
+        """
+        Constructor
+        """
         super().__init__(driver_class, css_path, watch_css)
 
         if not country_data:
@@ -436,15 +514,24 @@ class BrowserApp(App):
             ] = [country_name.strip().title()]
 
     def action_quit_app(self):
+        """
+        Exit handler
+        """
         self.exit(0)
 
     def compose(self) -> ComposeResult:
+        """
+        UI element layout
+        """
         yield Header(show_clock=True)
         yield DataTable(id='runners')
         yield Footer()
 
     def on_mount(self) -> None:
-        table = self.get_widget_by_id(f'runners', expect_type=DataTable)
+        """
+        UI element rendering
+        """
+        table = self.get_widget_by_id('runners', expect_type=DataTable)
         table.zebra_stripes = True
         table.cursor_type = 'row'
         columns_raw, rows = df_to_list_of_tuples(self.df)
@@ -463,11 +550,17 @@ class BrowserApp(App):
 
     @on(DataTable.HeaderSelected, '#runners')
     def on_header_clicked(self, event: DataTable.HeaderSelected):
+        """
+        Callback when user clicks the table column
+        """
         table = event.data_table
         table.sort(event.column_key)
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
+        """
+        Callback when the user clicks a row, to get more racer details displayed
+        """
         table = event.data_table
         row = table.get_row(event.row_key)
         runner_detail = RunnerDetailScreen(df=self.df, row=row)

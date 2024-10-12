@@ -23,6 +23,9 @@ logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=lo
 
 
 def run_raw_cleaner():
+    """
+    Entry point for raw cleaner
+    """
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
         '--verbose',
@@ -41,23 +44,26 @@ def run_raw_cleaner():
         type=Path,
         help='New report file'
     )
-    OPTIONS = parser.parse_args()
+    options = parser.parse_args()
     try:
-        with open(OPTIONS.report_file, 'w', newline='') as csvfile:
+        with open(options.report_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=FIELD_NAMES, quoting=csv.QUOTE_NONNUMERIC)
             writer.writeheader()
-            for row in raw_copy_paste_read(OPTIONS.raw_file):
+            for row in raw_copy_paste_read(options.raw_file):
                 try:
                     writer.writerow(row)
-                    if OPTIONS.verbose:
+                    if options.verbose:
                         logging.warning(row)
                 except ValueError as ve:
-                    raise ValueError(f"row={row}", ve)
+                    raise ValueError(f"row={row}", ve) from ve
     except KeyboardInterrupt:
         pass
 
 
 def run_5_number():
+    """
+    Entry point for 5 number app
+    """
     parser = ArgumentParser(description="5 key indicators report")
     parser.add_argument(
         "results",
@@ -72,12 +78,15 @@ def run_5_number():
         FiveNumberApp.DF = load_data(options.results[0])
     else:
         FiveNumberApp.DF = load_data()
-    app.title = f"Five Number Summary".title()
+    app.title = "Five Number Summary".title()
     app.sub_title = f"Runners: {FiveNumberApp.DF.shape[0]}"
     app.run()
 
 
 def run_outlier():
+    """
+    Entry point for outlier app
+    """
     parser = ArgumentParser(description="Show race outliers")
     parser.add_argument(
         "results",
@@ -92,12 +101,15 @@ def run_outlier():
     else:
         OutlierApp.DF = load_data()
     app = OutlierApp()
-    app.title = f"Outliers Summary".title()
+    app.title = "Outliers Summary".title()
     app.sub_title = f"Runners: {OutlierApp.DF.shape[0]}"
     app.run()
 
 
 def simple_plot():
+    """
+    Entry point for simple plot
+    """
     parser = ArgumentParser(description="Different Age plots for Empire State RunUp")
     parser.add_argument(
         "--type",
@@ -136,6 +148,9 @@ def simple_plot():
 
 
 def run_browser():
+    """
+    Entry point for runner browser app
+    """
     parser = ArgumentParser(description="Browse user results")
     parser.add_argument(
         "--country",
@@ -162,12 +177,15 @@ def run_browser():
         df=df,
         country_data=country_df
     )
-    app.title = f"Race runners".title()
+    app.title = "Race runners".title()
     app.sub_title = f"Browse details: {app.df.shape[0]}"
     app.run()
 
 
 def run_scraper():
+    """
+    Entry point for web scraper
+    """
     parser = ArgumentParser(description="Website scraper for race results")
     parser.add_argument(
         "report_file",
@@ -180,24 +198,27 @@ def run_scraper():
     logging.info("Saving results to %s", report_file)
     with RacerLinksScraper(headless=True, debug=False) as link_scraper:
         total = len(link_scraper.racers)
-        logging.info(f"Got {total} racer results")
-        with open(report_file, 'w') as csv_file:
+        logging.info("Got %s racer results", total)
+        with open(report_file, 'w', encoding='utf-8') as csv_file:
             writer = csv.DictWriter(csv_file, fieldnames=FIELD_NAMES_FOR_SCRAPING, quoting=csv.QUOTE_NONNUMERIC)
             writer.writeheader()
             for bib in link_scraper.racers:
                 url = link_scraper.racers[bib][RaceFields.URL.value]
-                logging.info(f"Processing BIB: {bib}, will fetch: {url}")
+                logging.info("Processing BIB: %s, will fetch: %s", bib, url)
                 with RacerDetailsScraper(racer=link_scraper.racers[bib], debug_level=0) as rds:
                     try:
                         position = link_scraper.racers[bib][RaceFields.OVERALL_POSITION.value]
                         name = link_scraper.racers[bib][RaceFields.NAME.value]
                         writer.writerow(rds.racer)
-                        logging.info(f"Wrote: name={name}, position={position}, {rds.racer}")
+                        logging.info("Wrote: name=%s, position=%s, %s", name, position, rds.racer)
                     except ValueError as ve:
-                        raise ValueError(f"row={rds.racer}", ve)
+                        raise ValueError(f"row={rds.racer}", ve) from ve
 
 
 def run_csv_cleaner():
+    """
+    Entry point for CSV cleaner
+    """
     parser = ArgumentParser(description=__doc__)
     parser.add_argument(
         '--verbose',
@@ -216,17 +237,17 @@ def run_csv_cleaner():
         type=Path,
         help='New report file'
     )
-    OPTIONS = parser.parse_args()
+    options = parser.parse_args()
     try:
-        with open(OPTIONS.report_file, 'w', newline='') as csvfile:
+        with open(options.report_file, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=FIELD_NAMES_FOR_SCRAPING, quoting=csv.QUOTE_NONNUMERIC)
             writer.writeheader()
-            for row in raw_csv_read(OPTIONS.raw_file):
+            for row in raw_csv_read(options.raw_file):
                 try:
                     writer.writerow(row)
-                    if OPTIONS.verbose:
+                    if options.verbose:
                         logging.warning(row)
                 except ValueError as ve:
-                    raise ValueError(f"row={row}", ve)
+                    raise ValueError(f"row={row}", ve) from ve
     except KeyboardInterrupt:
         pass

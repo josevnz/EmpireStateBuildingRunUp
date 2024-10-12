@@ -1,17 +1,22 @@
+"""
+Unit tests for application
+"""
 import unittest
 from textual.widgets import DataTable, MarkdownViewer
 from empirestaterunup.apps import BrowserApp
 
 
 class AppTestCase(unittest.IsolatedAsyncioTestCase):
+    """
+    Unit tests for application
+    """
     async def test_browser_app(self):
+        """
+        Simulate running browser app, with some commands
+        """
         app = BrowserApp()
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
-
-            """
-            Test the command palette
-            """
             await pilot.press("ctrl+\\")
             for char in "jose".split():
                 await pilot.press(char)

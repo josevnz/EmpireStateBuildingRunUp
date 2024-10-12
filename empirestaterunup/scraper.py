@@ -1,3 +1,6 @@
+"""
+Common logic to scrape race results
+"""
 import pprint
 import re
 import subprocess
@@ -17,8 +20,13 @@ EMPIRE_STATE_2013_RACE_RESULTS = "https://www.athlinks.com/event/382111/results/
 
 
 class RacerLinksScraper:
-
+    """
+    Class that parses HTML from the results website to get race results
+    """
     def __init__(self, headless: bool = True, load_wait: int = 5, debug: bool = False):
+        """
+        Constructor
+        """
         self.rank_to_bib: list[int] = []
         options = Options()
         if headless:
@@ -31,6 +39,9 @@ class RacerLinksScraper:
         self.debug = debug
 
     def __enter__(self):
+        """
+        Context used for page parsing
+        """
         try:
             self.__get_racer_details__()
             self.__click__(6)
@@ -48,10 +59,13 @@ class RacerLinksScraper:
             self.__click__(7)
             self.__get_racer_details__()
         except NoSuchElementException as nse:
-            raise ValueError("Error finding race details", nse)
+            raise ValueError("Error finding race details", nse) from nse
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Cleanup
+        """
         self.driver.close()
 
     def __get_racer_details__(self) -> None:
@@ -155,7 +169,9 @@ class RacerLinksScraper:
 
 
 class RacerDetailsScraper:
-
+    """
+    Race detail scrapper, deals with different logic to get the results
+    """
     def __init__(self, racer: Dict[str, Any], headless: bool = True, load_wait: int = 5, debug_level: int = 0):
         options = Options()
         fp = webdriver.FirefoxProfile()

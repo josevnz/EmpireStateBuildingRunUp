@@ -4,6 +4,7 @@ author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
 import csv
 import datetime
+import logging
 import math
 import re
 from enum import Enum
@@ -12,6 +13,8 @@ from typing import Iterable, Any, Dict, Tuple, Union, List
 
 import pandas
 from pandas import DataFrame, Series
+
+logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
 """
 Runners started on waves, but for basic analysis we will assume all runners were able to run
@@ -58,12 +61,17 @@ Interested only in people who completed the 86 floors. So is either full course 
 
 
 class Level(Enum):
+    """
+    Course levels
+    """
     FULL = "Full Course"
     DNF = "DNF"
 
 
-# Fields are sorted by interest
 class RaceFields(Enum):
+    """
+    Race fields, sorted by interest
+    """
     BIB = "bib"
     NAME = "name"
     OVERALL_POSITION = "overall position"
@@ -94,13 +102,16 @@ class RaceFields(Enum):
 FIELD_NAMES = [x.value for x in RaceFields if x != RaceFields.URL]
 FIELD_NAMES_FOR_SCRAPING = [x.value for x in RaceFields]
 FIELD_NAMES_AND_POS: Dict[RaceFields, int] = {}
-pos = 0
+POS = 0
 for field in RaceFields:
-    FIELD_NAMES_AND_POS[field] = pos
-    pos += 1
+    FIELD_NAMES_AND_POS[field] = POS
+    POS += 1
 
 
 def get_wave_from_bib(bib: int) -> Waves:
+    """
+    Get wave from bib
+    """
     for wave in Waves:
         (lower, upper) = wave.value[1]
         if lower <= bib <= upper:
@@ -109,16 +120,25 @@ def get_wave_from_bib(bib: int) -> Waves:
 
 
 def get_description_for_wave(wave: Waves) -> str:
+    """
+    Get description from wave
+    """
     return wave.value[0]
 
 
 def get_wave_start_time(wave: Waves) -> datetime:
+    """
+    Get wave start time
+    """
     return wave.value[2]
 
 
 def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
+    """
+    Get raw CSV
+    """
     record = {}
-    with open(raw_file, 'r') as raw_csv_file:
+    with open(raw_file, 'r', encoding='utf-8') as raw_csv_file:
         reader = csv.DictReader(raw_csv_file)
         row: Dict[str, Any]
         for row in reader:
@@ -179,7 +199,7 @@ def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                     record[csv_field] = ""
                 yield record
             except IndexError:
-                raise
+                logging.exception("Field: %s", csv_field)
 
 
 def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
@@ -210,13 +230,13 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
     :param raw_file: Yes, copied and pasted all the 8 pages when started the project, before writing a scraper :D
     :return:
     """
-    with open(raw_file, 'r') as file_data:
+    with open(raw_file, 'r', encoding='utf-8') as file_data:
         tk_cnt = 0
         ln_cnt = 0
         record = {}
         info_pattern = re.compile("([A-Z]) (\\d+)Bib (\\d*)(.*)")
         info_pattern2 = re.compile("([A-Z]+)Bib (\\d+)-, (.*)")
-        DNF_BIB = [434]
+        dnf_bib = [434]
         for line in file_data:
             try:
                 tk_cnt += 1
@@ -233,7 +253,7 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                         record[RaceFields.GENDER.value] = matcher.group(1).upper()
                         record[RaceFields.AGE.value] = int(matcher.group(2))
                         record[RaceFields.BIB.value] = int(matcher.group(3))
-                        if record[RaceFields.BIB.value] in DNF_BIB:
+                        if record[RaceFields.BIB.value] in dnf_bib:
                             record[
                                 RaceFields.LEVEL.value] = Level.DNF.value
                         else:
@@ -308,12 +328,15 @@ def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
 
                     yield record
             except ValueError as ve:
-                raise ValueError(f"ln_cnt={ln_cnt}, tk_cnt={tk_cnt},{record}", ve)
+                raise ValueError(f"ln_cnt={ln_cnt}, tk_cnt={tk_cnt},{record}", ve) from ve
 
 
 class CourseRecords(Enum):
-    Male = ('Paul Crake', 'Australia', 2003, '9:33')
-    Female = ('Andrea Mayr', 'Austria', 2006, '11:23')
+    """
+    Course records (valid as 2024)
+    """
+    MALE = ('Paul Crake', 'Australia', 2003, '9:33')
+    FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
 
 RACE_RESULTS_FIRST_LEVEL = Path(__file__).parent.joinpath("results-first-level-2023.csv")
@@ -344,7 +367,7 @@ def load_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
         try:
             df[time_field] = pandas.to_timedelta(df[time_field])
         except ValueError as ve:
-            raise ValueError(f'{time_field}={df[time_field]}', ve)
+            raise ValueError(f'{time_field}={df[time_field]}', ve) from ve
     df['finishtimestamp'] = BASE_RACE_DATETIME + df[RaceFields.TIME.value]
     if remove_dnf:
         df.drop(df[df.level == 'DNF'].index, inplace=True)
@@ -439,6 +462,9 @@ def df_to_list_of_tuples(
 
 
 def series_to_list_of_tuples(series: Series) -> list[Tuple]:
+    """
+    Helper series to list of tuples
+    """
     dct = series.to_dict()
     rows = []
     for key, value in dct.items():
@@ -463,6 +489,9 @@ def load_country_details(data_file: Path = None) -> DataFrame:
 
 
 class CountryColumns(Enum):
+    """
+    Country columns
+    """
     NAME = "name"
     ALPHA_2 = "alpha-2"
     ALPHA_3 = "alpha-3"
@@ -480,6 +509,9 @@ COUNTRY_COLUMNS = [country.value for country in CountryColumns]
 
 
 def lookup_country_by_code(df: DataFrame, three_letter_code: str) -> DataFrame:
+    """
+    Lookup by country
+    """
     if not isinstance(three_letter_code, str):
         raise ValueError(f"Invalid type for three letter country code: '{three_letter_code}'")
     if len(three_letter_code) != 3:
@@ -488,18 +520,30 @@ def lookup_country_by_code(df: DataFrame, three_letter_code: str) -> DataFrame:
 
 
 def get_times(df: DataFrame) -> DataFrame:
+    """
+    Get times from dataframe
+    """
     return df.select_dtypes(include=['timedelta64', 'datetime64'])
 
 
 def get_positions(df: DataFrame) -> DataFrame:
+    """
+    Get positions from dataframe
+    """
     return df.select_dtypes(include=['int64'])
 
 
 def get_categories(df: DataFrame) -> DataFrame:
+    """
+    Get categories from dataframe
+    """
     return df.select_dtypes(include=['object'])
 
 
 def beautify_race_times(time: datetime.timedelta) -> str:
+    """
+    Formatting for provided time
+    """
     mm, ss = divmod(time.total_seconds(), 60)
     hh, mm = divmod(mm, 60)  # Ignore days part as the race doesn't last more than 24 hours
     return f"{int(hh)}:{int(mm)}:{int(ss)}"

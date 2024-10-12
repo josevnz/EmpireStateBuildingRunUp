@@ -1,3 +1,6 @@
+"""
+Scrapper unit tests
+"""
 import logging
 import pprint
 import unittest
@@ -10,13 +13,22 @@ logger.setLevel(logging.DEBUG)
 
 
 class RacerLinksScraperTestCase(unittest.TestCase):
+    """
+    Run different unit tests
+    """
     def test_link_scraper(self):
+        """
+        Scrappe links
+        """
         with RacerLinksScraper(headless=True, debug=False) as esc:
             self.assertIsNotNone(esc)
             self.assertEqual(377, len(esc.racers))
             self.assertEqual(377, len(esc.rank_to_bib))
 
     def test_runner_detail(self):
+        """
+        Scraper for runner details
+        """
         racer_details = [
             {
                 RaceFields.NAME.value: 'David Kilgore',

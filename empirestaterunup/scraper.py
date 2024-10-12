@@ -37,6 +37,8 @@ class RacerLinksScraper:
         """
         Constructor
         """
+        if not isinstance(year, YearResults):
+            raise ValueError(f"Invalid year passed: {year}")
         self.rank_to_bib: list[int] = []
         options = Options()
         if headless:
@@ -47,27 +49,58 @@ class RacerLinksScraper:
         sleep(self.load_wait)
         self.racers = {}
         self.debug = debug
+        self.year = year
 
     def __enter__(self):
         """
-        Context used for page parsing
+        Context used for page parsing.
+        The level ... is not consistent across pages, so the logic is hardcoded.
+        That's one of the many problems of web scraping.
         """
         try:
-            self.__get_racer_details__()
-            self.__click__(6)
-            self.__get_racer_details__()
-            self.__click__(7)
-            self.__get_racer_details__()
-            self.__click__(7)
-            self.__get_racer_details__()
-            self.__click__(9)
-            self.__get_racer_details__()
-            self.__click__(9)
-            self.__get_racer_details__()
-            self.__click__(7)
-            self.__get_racer_details__()
-            self.__click__(7)
-            self.__get_racer_details__()
+            # 8 pages, first + 7 extra
+            if self.year == YearResults.RESULTS_2013:
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=7)
+                self.__get_racer_details__()
+                self.__click__(level=7)
+                self.__get_racer_details__()
+                self.__click__(level=9)
+                self.__get_racer_details__()
+                self.__click__(level=9)
+                self.__get_racer_details__()
+                self.__click__(level=7)
+                self.__get_racer_details__()
+                self.__click__(level=7)
+                self.__get_racer_details__()
+            # 12 pages, first + 11 extra
+            elif self.year == YearResults.RESULTS_2014:
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+                self.__get_racer_details__()
+                self.__click__(level=6)
+            else:
+                raise NotImplemented(f"I don't know yet how to handle yet results from {self.year.name}!")
         except NoSuchElementException as nse:
             raise ValueError("Error finding race details", nse) from nse
         return self

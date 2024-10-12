@@ -17,7 +17,7 @@ from matplotlib import pyplot as plt
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
 from empirestaterunup.data import raw_copy_paste_read, FIELD_NAMES, load_data, load_country_details, RaceFields, \
     raw_csv_read, FIELD_NAMES_FOR_SCRAPING
-from empirestaterunup.scraper import RacerLinksScraper, RacerDetailsScraper
+from empirestaterunup.scraper import RacerLinksScraper, RacerDetailsScraper, YearResults
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
@@ -186,7 +186,21 @@ def run_scraper():
     """
     Entry point for web scraper
     """
+    years = [year.name for year in YearResults]
+
+    def get_year(year: str) -> YearResults:
+        try:
+            return YearResults[year]
+        except KeyError:
+            YearResults.RESULTS_2013
+
     parser = ArgumentParser(description="Website scraper for race results")
+    parser.add_argument(
+        "--year",
+        choices=(YearResults.RESULTS_2013.name, YearResults.RESULTS_2014.name),
+        default=YearResults.RESULTS_2013.name,
+        help=f"Year results to scrape. Supported: {','.join(years)}. Default: {YearResults.RESULTS_2013.name}"
+    )
     parser.add_argument(
         "report_file",
         action="store",
@@ -194,9 +208,10 @@ def run_scraper():
         help="Location of the final SCRAPING results"
     )
     options = parser.parse_args()
+    year = get_year(options.year)
     report_file = Path(options.report_file)
     logging.info("Saving results to %s", report_file)
-    with RacerLinksScraper(headless=True, debug=False) as link_scraper:
+    with RacerLinksScraper(headless=True, debug=False, year=year) as link_scraper:
         total = len(link_scraper.racers)
         logging.info("Got %s racer results", total)
         with open(report_file, 'w', encoding='utf-8') as csv_file:

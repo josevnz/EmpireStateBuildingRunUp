@@ -1,6 +1,12 @@
-# EmpireStateRunUp changelog
+# Empire State Building RunUp changelog
 
 Most important changes on this project, by version.
+
+## Oct Tue 15 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.1
+- Removed all references to scraping code. This will be done on a separate project.
+- Data included with the project for 2024 and 2023 results
+- Scrubbing with Pylint and GitHub actions
+- TUI updates
 
 ## Mar Fri 28 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.6
 - Using new version of libraries (bug-fixes and modest speed improvements)

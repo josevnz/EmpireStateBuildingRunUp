@@ -320,7 +320,6 @@ class CourseRecords(Enum):
     FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
 
-RACE_RESULTS_FIRST_LEVEL_2023 = Path(__file__).parent.joinpath("results-first-level-2023.csv")
 RACE_RESULTS_FULL_LEVEL_2023 = Path(__file__).parent.joinpath("results-full-level-2023.csv")
 RACE_RESULTS_FULL_LEVEL_2024 = Path(__file__).parent.joinpath("results-full-level-2024.csv")
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.csv")

@@ -65,10 +65,7 @@ git clone https://github.com/josevnz/EmpireStateBuildingRunUp.git
 cd EmpireStateBuildingRunUp
 python -m ~/virtualenv/EmpireStateRunUp
 . ~/virtualenv/EmpireStateRunUp/bin/activate
-pip install --upgrade pip
-pip install --upgrade build
-pip install --upgrade wheel
-pip install --editable .
+pip install --editable .[lint,dev]
 ````
 
 Or if you just want to run the code while reading this tutorial (using my latest version from [Pypi](https://pypi.org/project/EmpireStateRunUp/)):

@@ -1,4 +1,4 @@
-# Empire State Run Up
+# Empire State Building Run Up
 
 [![Downloads](https://static.pepy.tech/badge/EmpireStateRunUp)](https://pepy.tech/project/EmpireStateRunUp)
 

@@ -7,7 +7,6 @@
 ![ESRU browser](images/esru_browser.png)
 
 
-
 Hello. I wrote an application to analyse the results of the 'Empire State Run Up', 2013 edition, after I ran the race. 
 
 Here you will find my code.
@@ -32,6 +31,10 @@ There are 4 scripts that you can run:
 * esru_plot
 
 If you want to learn more about these programs, please grab a cup of coffe and read the [TUTORIAL](TUTORIAL.md)
+
+## NOTE
+
+This branch will freeze the code, so it can be referenced properly from [Data Analysis with Python – How I Analyzed My Empire State Building Run-Up Performance](https://www.freecodecamp.org/news/empire-state-building-run-up-analysis-with-python/). Further improvements will happen in master.
 
 ## If you are a developer
 

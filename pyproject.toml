@@ -37,19 +37,16 @@ classifiers = [
 ]
 dependencies = [
     "pandas==2.2.2",
-    "textual-dev==1.5.1",
-    "textual==0.70.0",
-    "textual-serve==1.0.1",
-    "rich==13.7.1",
+    "textual-dev==1.7.0",
+    "textual==1.0.0",
+    "textual-serve==1.1.1",
+    "rich==13.9.4",
     "numpy==1.26.4",
     "matplotlib==3.8.3",
     "selenium==4.15.2"
 ]
 license = {file = "LICENSE"}
 [project.scripts]
-esru_scraper = "empirestaterunup.runners:run_scraper"
-esru_csv_cleaner = "empirestaterunup.runners:run_csv_cleaner"
-esru_raw_cleaner = "empirestaterunup.runners:run_raw_cleaner"
 esru_numbers = "empirestaterunup.runners:run_5_number"
 esru_outlier = "empirestaterunup.runners:run_outlier"
 esru_browser = "empirestaterunup.runners:run_browser"

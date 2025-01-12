@@ -2,8 +2,7 @@
 requires = [
     "setuptools >= 70.1.0",
     "wheel",
-    "build",
-    "textual-serve",
+    "build==1.2.2.post1",
     "pip"
 
 ]
@@ -11,16 +10,16 @@ build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 lint = [
-    "pylint",
+    "pylint==3.3.1",
 ]
 dev = [
-    "textual-dev",
-    "twine",
+    "textual-dev==1.7.0",
+    "twine==5.1.1",
 ]
 
 [project]
 name = "EmpireStateRunUp"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -37,13 +36,11 @@ classifiers = [
 ]
 dependencies = [
     "pandas==2.2.2",
-    "textual-dev==1.7.0",
     "textual==1.0.0",
     "textual-serve==1.1.1",
     "rich==13.9.4",
     "numpy==1.26.4",
-    "matplotlib==3.8.3",
-    "selenium==4.15.2"
+    "matplotlib==3.8.3"
 ]
 license = {file = "LICENSE"}
 [project.scripts]

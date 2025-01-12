@@ -2,9 +2,9 @@
 
 Most important changes on this project, by version.
 
-## Jan Sun 12 2025 <kodegeek.com@protonmail.com> - 0.7
+## Jan Sun 12 2025 <kodegeek.com@protonmail.com> - 0.1.1
 - Removed creation of 3 deprecated applications: esru_scraper, esru_csv_cleaner, esru_raw_cleaner
-- 
+- Removed all scrapping code, instead follow [athlinks-races](https://github.com/josevnz/athlinks-races)
 
 ## Mar Fri 28 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.6
 - Using new version of libraries (bug-fixes and modest speed improvements)

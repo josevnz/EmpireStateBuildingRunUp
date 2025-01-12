@@ -163,22 +163,11 @@ The code above is hardly reusable, but it gets the job done by doing the followi
 3) Then find and click the `>` (next page) button.
 4) Do this steps for a total of 8 times, as this is how many pages of results are available (each page has 50 runners)
 
-To get the full race results I wrote [scraper.py](empirestaterunup/scraper.py) code, the code deals with navigating multiple pages and extracting the data. Demonstration below:
-
-```shell
-(EmpireStateRunUp) [josevnz@dmaf5 EmpireStateRunUp]$ esru_scraper /home/josevnz/temp/raw_data.csv
-2023-12-30 14:05:00,987 Saving results to /home/josevnz/temp/raw_data.csv
-2023-12-30 14:05:53,091 Got 377 racer results
-2023-12-30 14:05:53,091 Processing BIB: 19, will fetch: https://www.athlinks.com/event/382111/results/Event/1062909/Course/2407855/Bib/19
-2023-12-30 14:06:02,207 Wrote: name=Wai Ching Soh, position=1, {'name': 'Wai Ching Soh', 'url': 'https://www.athlinks.com/event/382111/results/Event/1062909/Course/2407855/Bib/19', 'overall position': '1', 'gender': 'M', 'age': 29, 'city': 'Kuala Lumpur', 'state': '-', 'country': 'MYS', 'bib': 19, '20th floor position': '1', '20th floor gender position': '1', '20th floor division position': '1', '20th floor pace': '42:30', '20th floor time': '1:42', '65th floor position': '1', '65th floor gender position': '1', '65th floor division position': '1', '65th floor pace': '54:03', '65th floor time': '7:34', 'gender position': '1', 'division position': '1', 'pace': '53:00', 'time': '10:36', 'level': 'Full Course'}
-...
-```
-
-It does just minimal manipulation of the data from the web page, the purpose of this code is just to get the data as quickly as possible before the formatting changes
-
-Data cannot be used yet as-is, needs cleaning up and that is the next step in this article.
+After a while I realized than scrapping the race results was a full project that required better code by itself and a new project was created: [athlinks-races](https://github.com/josevnz/athlinks-races)
 
 ## Cleaning up the data
+
+Data cannot be used yet as-is, needs cleaning up and that is the next step in this article.
 
 [Getting the data](test/raw_data.txt) is just the first battle of many more to come. [You will notice inconsistencies on the data](https://en.wikibooks.org/wiki/Statistics/Data_Analysis/Data_Cleaning), missing values and in order
 to make your numeric results good, you need to make assumptions.

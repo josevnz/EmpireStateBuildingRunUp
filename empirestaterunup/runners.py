@@ -17,7 +17,6 @@ from matplotlib import pyplot as plt
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
 from empirestaterunup.data import raw_copy_paste_read, FIELD_NAMES, load_data, load_country_details, RaceFields, \
     raw_csv_read, FIELD_NAMES_FOR_SCRAPING
-from empirestaterunup.scraper import RacerLinksScraper, RacerDetailsScraper
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
@@ -180,39 +179,6 @@ def run_browser():
     app.title = "Race runners".title()
     app.sub_title = f"Browse details: {app.df.shape[0]}"
     app.run()
-
-
-def run_scraper():
-    """
-    Entry point for web scraper
-    """
-    parser = ArgumentParser(description="Website scraper for race results")
-    parser.add_argument(
-        "report_file",
-        action="store",
-        type=Path,
-        help="Location of the final SCRAPING results"
-    )
-    options = parser.parse_args()
-    report_file = Path(options.report_file)
-    logging.info("Saving results to %s", report_file)
-    with RacerLinksScraper(headless=True, debug=False) as link_scraper:
-        total = len(link_scraper.racers)
-        logging.info("Got %s racer results", total)
-        with open(report_file, 'w', encoding='utf-8') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=FIELD_NAMES_FOR_SCRAPING, quoting=csv.QUOTE_NONNUMERIC)
-            writer.writeheader()
-            for bib in link_scraper.racers:
-                url = link_scraper.racers[bib][RaceFields.URL.value]
-                logging.info("Processing BIB: %s, will fetch: %s", bib, url)
-                with RacerDetailsScraper(racer=link_scraper.racers[bib], debug_level=0) as rds:
-                    try:
-                        position = link_scraper.racers[bib][RaceFields.OVERALL_POSITION.value]
-                        name = link_scraper.racers[bib][RaceFields.NAME.value]
-                        writer.writerow(rds.racer)
-                        logging.info("Wrote: name=%s, position=%s, %s", name, position, rds.racer)
-                    except ValueError as ve:
-                        raise ValueError(f"row={rds.racer}", ve) from ve
 
 
 def run_csv_cleaner():

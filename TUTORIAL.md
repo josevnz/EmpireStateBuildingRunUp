@@ -174,7 +174,7 @@ to make your numeric results good, you need to make assumptions.
 
 Luckily for me, the dataset is very small (375+ records, one for each runner) so I was able to come up with a few rules to tidy up the [data file](empirestaterunup/results-first-level-2023.csv) I was going to use during my analysis.
 
-I also supplemented my data with another data set that has the countries [3-digit codes](empirestaterunup/country_codes.csv) as well as other details, for a nicer presentation.
+I also supplemented my data with another data set that has the countries [3-digit codes](empirestaterunup/country_codes.toml) as well as other details, for a nicer presentation.
 
 The [data_normalizer.raw_read(raw_file: Path) -> Iterable[Dict[str, Any]]](empirestaterunup/runners.py) method does the heavy work of fixing the data for inconsistencies before saving into a CSV format.
 

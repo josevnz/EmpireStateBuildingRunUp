@@ -8,7 +8,6 @@ from functools import partial
 from pathlib import Path
 from typing import Type, Any, List
 
-# from matplotlib import colors
 from pandas import DataFrame, Timedelta
 from rich.style import Style
 from rich.text import Text
@@ -25,7 +24,7 @@ from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age
     dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, better_than_median_waves, FastestFilters, \
     find_fastest
 from empirestaterunup.data import load_data, df_to_list_of_tuples, load_country_details, \
-    lookup_country_by_code, CountryColumns, RaceFields, series_to_list_of_tuples, beautify_race_times, \
+    lookup_country_by_code, RaceFields, series_to_list_of_tuples, beautify_race_times, \
     FIELD_NAMES_AND_POS
 
 
@@ -501,12 +500,12 @@ class BrowserApp(App):
 
         for three_letter_code in set(self.df[RaceFields.COUNTRY.value].tolist()):
             filtered_country = lookup_country_by_code(
-                df=self.country_data,
+                country_data=self.country_data,
                 three_letter_code=three_letter_code
             )
             country_name: str = three_letter_code
-            if CountryColumns.NAME.value in filtered_country.columns:
-                country_name = filtered_country[CountryColumns.NAME.value].values[0]
+            if filtered_country:
+                country_name = filtered_country[0]
             filtered = self.df[RaceFields.COUNTRY.value] == three_letter_code
             self.df.loc[
                 filtered,

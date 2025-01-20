@@ -12,7 +12,9 @@ from pathlib import Path
 from typing import Iterable, Any, Dict, Tuple, Union, List
 
 import pandas
+import tomlkit
 from pandas import DataFrame, Series
+from tomlkit import load, TOMLDocument
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
@@ -341,7 +343,7 @@ class CourseRecords(Enum):
 
 RACE_RESULTS_FIRST_LEVEL = Path(__file__).parent.joinpath("results-first-level-2023.csv")
 RACE_RESULTS_FULL_LEVEL = Path(__file__).parent.joinpath("results-full-level-2023.csv")
-COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.csv")
+COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
 
 
 def load_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
@@ -472,20 +474,28 @@ def series_to_list_of_tuples(series: Series) -> list[Tuple]:
     return rows
 
 
-def load_country_details(data_file: Path = None) -> DataFrame:
+def load_country_details(data_file: Path = None) -> TOMLDocument:
     """
-    ```csv
-    name,alpha-2,alpha-3,country-code,iso_3166-2,region,sub-region,intermediate-region,region-code,sub-region-code,intermediate-region-code
-    United States of America,US,USA,840,ISO 3166-2:US,Americas,Northern America,"",019,021,""
+    Args:
+        data_file (Path): Path to data file in TOML format
+    [ISOCountryCodes]
+    name = "United States of America"
+    alpha-2 = "US"
+    alpha-3 = "USA"
+    country-code = "840"
+    iso_3166-2 = "ISO 3166-2:US"
+    region = "Americas"
+    sub-region = "Northern America"
+    intermediate-region = ""
+    region-code = "019"
+    sub-region-code = "021"
+    intermediate-region-code = ""
+
     """
-    if data_file:
-        def_file = data_file
-    else:
-        def_file = COUNTRY_DETAILS
-    df = pandas.read_csv(
-        def_file
-    )
-    return df
+    def_file = COUNTRY_DETAILS if data_file is None else data_file
+    with open(def_file, 'r', encoding='utf-8') as f:
+        data = tomlkit.load(fp=f)
+        return data
 
 
 class CountryColumns(Enum):
@@ -508,15 +518,22 @@ class CountryColumns(Enum):
 COUNTRY_COLUMNS = [country.value for country in CountryColumns]
 
 
-def lookup_country_by_code(df: DataFrame, three_letter_code: str) -> DataFrame:
+def lookup_country_by_code(country_data: TOMLDocument, three_letter_code: str) -> Union[Tuple[str, TOMLDocument], None]:
     """
-    Lookup by country
+    Args:
+        country_data (TOMLDocument): TOML document with country details
+        three_letter_code: 3-letter ISO code used to filter country
+    Returns:
+        TOML document with country details, none if the lookup fails
     """
     if not isinstance(three_letter_code, str):
         raise ValueError(f"Invalid type for three letter country code: '{three_letter_code}'")
     if len(three_letter_code) != 3:
         raise ValueError(f"Invalid three letter country code: '{three_letter_code}'")
-    return df.loc[df[CountryColumns.ALPHA_3.value] == three_letter_code]
+    for country_name, country_details in country_data.items():
+        if three_letter_code == country_details['alpha-3']:
+            return country_name, country_details
+    return None
 
 
 def get_times(df: DataFrame) -> DataFrame:

@@ -8,7 +8,11 @@ from pathlib import Path
 from pandas import Series
 
 from empirestaterunup.analyze import better_than_median_waves, find_fastest, FastestFilters
-from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, df_to_list_of_tuples, load_country_details, lookup_country_by_code, COUNTRY_COLUMNS, get_times, get_positions, get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, FIELD_NAMES_AND_POS
+from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, \
+    df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
+    get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, \
+    FIELD_NAMES_AND_POS, CountryColumns
+
 RAW_COPY_PASTE_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.txt")
 RAW_CSV_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.csv")
 
@@ -87,16 +91,15 @@ class DataTestCase(unittest.TestCase):
         """
         Load country details
         """
-        data = load_country_details()
-        self.assertIsNotNone(data)
-        countries = data['name']
+        countries = load_country_details()
         self.assertIsNotNone(countries)
-        for _, country in data.iterrows():
-            self.assertIsNotNone(country.iloc[2])
+        for name, data in countries.items():
+            self.assertIsNotNone(name)
+            self.assertIsNotNone(data)
 
     def test_country_lookup(self):
         """
-        Lookup country codes
+        Lookup country codes. Also checks than the country data is complete
         """
         run_data = load_data()
         self.assertIsNotNone(run_data)
@@ -106,13 +109,14 @@ class DataTestCase(unittest.TestCase):
         country_idx = FIELD_NAMES_AND_POS[RaceFields.COUNTRY]
         for row in rows:
             country_code = row[country_idx]
-            country_df = lookup_country_by_code(
-                df=country_data,
+            name, details = lookup_country_by_code(
+                country_data=country_data,
                 three_letter_code=country_code
             )
-            self.assertIsNotNone(country_df)
-            for column in COUNTRY_COLUMNS:
-                self.assertIsNotNone(country_df[column])
+            self.assertIsNotNone(name)
+            self.assertIsNotNone(details)
+            for column in [country.value for country in CountryColumns if country.value != CountryColumns.NAME.value]:
+                self.assertIsNotNone(details[column])
 
     def test_get_times(self):
         """

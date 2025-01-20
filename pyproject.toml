@@ -40,7 +40,8 @@ dependencies = [
     "textual-serve==1.1.1",
     "rich==13.9.4",
     "numpy==1.26.4",
-    "matplotlib==3.8.3"
+    "matplotlib==3.8.3",
+    "tomlkit==0.13.2"
 ]
 license = {file = "LICENSE"}
 [project.scripts]

@@ -14,7 +14,7 @@ from typing import Iterable, Any, Dict, Tuple, Union, List
 import pandas
 import tomlkit
 from pandas import DataFrame, Series
-from tomlkit import load, TOMLDocument
+from tomlkit import TOMLDocument
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 

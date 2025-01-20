@@ -60,7 +60,7 @@ where = ["."]
 exclude = ["test*"]
 
 [tool.setuptools.package-data]
-empirestaterunup = ["*.txt", "*.tcss", "*.csv"]
+empirestaterunup = ["*.txt", "*.tcss", "*.json", "*.toml"]
 images = ["*.png", "*.svg"]
 
 

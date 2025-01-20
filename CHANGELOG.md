@@ -4,6 +4,9 @@ Most important changes on this project, by version.
 
 ## Jan Mon 20 2025 <kodegeek.com@protonmail.com> - 0.2.0
 - Switched country codes from CSV to TOML to make it easier to maintain. Changes on code to support new format.
+- Removed all wave details. Data is not part of the official race results and logic is known only to the race 
+  organizers, too much work for guesswork.
+- Use new JSON format for race results as opposed to CSV.
 
 ## Jan Sun 12 2025 <kodegeek.com@protonmail.com> - 0.1.1
 - Removed creation of 3 deprecated applications: esru_scraper, esru_csv_cleaner, esru_raw_cleaner

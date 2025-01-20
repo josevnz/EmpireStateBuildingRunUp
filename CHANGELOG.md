@@ -3,7 +3,7 @@
 Most important changes on this project, by version.
 
 ## Jan Mon 20 2025 <kodegeek.com@protonmail.com> - 0.2.0
-- Switched country codes from CSV to TOML to make it easier to maintain. Changes on code to support new format.
+- Switched country codes from CSV to [TOML](https://toml.io/en/) to make it easier to maintain. Changes on code to support new format.
 - Removed all wave details. Data is not part of the official race results and logic is known only to the race 
   organizers, too much work for guesswork.
 - Use new _JSON_ format for race results as opposed to _CSV_. 

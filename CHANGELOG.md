@@ -6,11 +6,11 @@ Most important changes on this project, by version.
 - Switched country codes from CSV to TOML to make it easier to maintain. Changes on code to support new format.
 - Removed all wave details. Data is not part of the official race results and logic is known only to the race 
   organizers, too much work for guesswork.
-- Use new JSON format for race results as opposed to CSV. 
-  - Race results: https://www.athlinks.com/event/382111?category=global&term=EmpireState
-  - Results scrapped with: https://pypi.org/project/athlinks-races/
-    - 2023 - https://www.athlinks.com/event/382111/results/Event/1062909/Results
-    - 2024 - https://www.athlinks.com/event/382111/results/Event/1093108/Results
+- Use new _JSON_ format for race results as opposed to _CSV_. 
+  - Race [results](https://www.athlinks.com/event/382111?category=global&term=EmpireState)
+  - Results scrapped with [athlinks-races](https://pypi.org/project/athlinks-races/)
+    - [2023](https://www.athlinks.com/event/382111/results/Event/1062909/Results)
+    - [2024](https://www.athlinks.com/event/382111/results/Event/1093108/Results)
 
 ## Jan Sun 12 2025 <kodegeek.com@protonmail.com> - 0.1.1
 - Removed creation of 3 deprecated applications: esru_scraper, esru_csv_cleaner, esru_raw_cleaner

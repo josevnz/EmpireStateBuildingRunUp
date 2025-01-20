@@ -123,3 +123,12 @@ esru_server --application esru_numbers
 
 sru_server --application esru_browser empirestaterunup/results-full-level-2023.csv
 ```
+
+## Getting latest race results
+
+I used [athlinks-races](https://pypi.org/project/athlinks-races/) to parse the race results. This is an example of a scrapping session:
+
+```shell
+athlinks_races_cli --metadata_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/metadata-2023.json --athletes_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/results-2023.json --format jsonlines --race_url https://www.athlinks.com/event/382111/results/Event/1062909/Results
+athlinks_races_cli --metadata_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/metadata-2024.json --athletes_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/results-2024.json --format jsonlines --race_url https://www.athlinks.com/event/382111/results/Event/1093108/Results
+```

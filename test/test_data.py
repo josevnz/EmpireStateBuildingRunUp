@@ -10,7 +10,7 @@ from pandas import Series
 from empirestaterunup.analyze import better_than_median_waves, find_fastest, FastestFilters
 from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, \
     df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
-    get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, \
+    get_categories, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, \
     FIELD_NAMES_AND_POS, CountryColumns
 
 RAW_COPY_PASTE_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.txt")
@@ -159,14 +159,6 @@ class DataTestCase(unittest.TestCase):
         self.assertEqual(43, wave_series.iloc[0])
         print(median_time)
         print(wave_series)
-
-    def test_raw_copy_paste_read(self):
-        """
-        Raw copy paste from data loading, no manipulations
-        """
-        clean_data = list(raw_copy_paste_read(RAW_COPY_PASTE_RACE_RESULTS))
-        self.assertIsNotNone(clean_data)
-        self.assertEqual(375, len(clean_data))
 
     def test_raw_csv_read(self):
         """

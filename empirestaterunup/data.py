@@ -6,7 +6,6 @@ import csv
 import datetime
 import logging
 import math
-import re
 from enum import Enum
 from pathlib import Path
 from typing import Iterable, Any, Dict, Tuple, Union, List
@@ -204,135 +203,6 @@ def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
                 logging.exception("Field: %s", csv_field)
 
 
-def raw_copy_paste_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
-    """
-    Read the whole RAW file, product of a manual copy and paste, return a clean version.
-    Deprecation warning: You should use the raw_csv_read() method on the file produced by the scraper.
-    Each record looks like this (copy and paste from the website):
-
-    NAME
-    GENDER BIB CITY,STATE,COUNTRY
-    OVERALL_POSITION
-    GENDER_POSITION
-    DIVISION_POSITION
-    PACE_MIN_PER_MILE_HH:MM:SS
-    MIN/MI
-    TIME_HH:MM:SS
-
-    ```
-    Wai Ching Soh
-    M 29Bib 19Kuala Lumpur, -, MYS
-    1
-    1
-    1
-    53:00
-    MIN/MI
-    10:36
-    ```
-    :param raw_file: Yes, copied and pasted all the 8 pages when started the project, before writing a scraper :D
-    :return:
-    """
-    with open(raw_file, 'r', encoding='utf-8') as file_data:
-        tk_cnt = 0
-        ln_cnt = 0
-        record = {}
-        info_pattern = re.compile("([A-Z]) (\\d+)Bib (\\d*)(.*)")
-        info_pattern2 = re.compile("([A-Z]+)Bib (\\d+)-, (.*)")
-        dnf_bib = [434]
-        for line in file_data:
-            try:
-                tk_cnt += 1
-                ln_cnt += 1
-                if tk_cnt == 1:
-                    record[RaceFields.NAME.value] = line.strip()
-                elif tk_cnt == 2:
-                    """
-                    M 29Bib 19Kuala Lumpur, -, MYS
-                    M 50Bib 3Colorado Springs, CO, USA
-                    """
-                    matcher = info_pattern.search(line.strip())
-                    if matcher:
-                        record[RaceFields.GENDER.value] = matcher.group(1).upper()
-                        record[RaceFields.AGE.value] = int(matcher.group(2))
-                        record[RaceFields.BIB.value] = int(matcher.group(3))
-                        if record[RaceFields.BIB.value] in dnf_bib:
-                            record[
-                                RaceFields.LEVEL.value] = Level.DNF.value
-                        else:
-                            record[RaceFields.LEVEL.value] = Level.FULL.value
-                        location = matcher.group(4).split(',')
-                        if len(location) == 3:
-                            record[RaceFields.CITY.value] = location[0].strip().capitalize()
-                            record[RaceFields.STATE.value] = location[1].strip().capitalize()
-                            record[RaceFields.COUNTRY.value] = location[2].strip().upper()
-                        elif len(location) == 2:
-                            record[RaceFields.CITY.value] = ""
-                            record[RaceFields.STATE.value] = location[0].strip().capitalize()
-                            record[RaceFields.COUNTRY.value] = location[1].strip().upper()
-                        elif len(location) == 1:
-                            record[RaceFields.CITY.value] = ""
-                            record[RaceFields.STATE.value] = ""
-                            record[RaceFields.COUNTRY.value] = location[0].strip().upper()
-                        else:  # This should not happen
-                            record[RaceFields.CITY.value] = ""
-                            record[RaceFields.STATE.value] = ""
-                            record[RaceFields.COUNTRY.value] = ""
-                        record[RaceFields.WAVE.value] = get_description_for_wave(get_wave_from_bib(record[RaceFields.BIB.value])).upper()
-                    else:
-                        matcher = info_pattern2.search(line.strip())
-                        if matcher:
-                            record[RaceFields.GENDER.value] = matcher.group(1).upper()
-                            record[RaceFields.AGE.value] = math.nan
-                            record[RaceFields.BIB.value] = int(matcher.group(2))
-                            record[RaceFields.CITY.value] = ""
-                            record[RaceFields.STATE.value] = ""
-                            record[RaceFields.COUNTRY.value] = matcher.group(3).upper()
-                        else:
-                            raise ValueError(f"Regexp failed for {line.strip()}")
-                elif tk_cnt == 3:
-                    record[RaceFields.OVERALL_POSITION.value] = int(line.strip())
-                elif tk_cnt == 4:
-                    try:
-                        record[RaceFields.GENDER_POSITION.value] = int(line.strip())
-                    except ValueError:
-                        # If GENDER is not specified the position is missing.
-                        record[
-                            RaceFields.GENDER_POSITION.value] = math.nan
-                elif tk_cnt == 5:
-                    record[RaceFields.DIVISION_POSITION.value] = int(line.strip())
-                elif tk_cnt == 6:
-                    parts = line.strip().split(':')
-                    if len(parts) == 3:
-                        record[RaceFields.PACE.value] = F"0{line.strip()}"
-                    else:
-                        record[RaceFields.PACE.value] = f"00:{line.strip()}"
-                elif tk_cnt == 7:
-                    pass  # Always MIN/MI
-                elif tk_cnt == 8:
-                    tk_cnt = 0
-                    parts = line.strip().split(':')
-                    if len(parts) == 3:
-                        record[RaceFields.TIME.value] = line.strip()
-                    else:
-                        record[RaceFields.TIME.value] = f"00:{line.strip()}"
-
-                    # None of the fields below are available on the first level copy and paste
-                    record[RaceFields.TWENTY_FLOOR_POSITION.value] = ""
-                    record[RaceFields.TWENTY_FLOOR_GENDER_POSITION.value] = ""
-                    record[RaceFields.TWENTY_FLOOR_DIVISION_POSITION.value] = ""
-                    record[RaceFields.TWENTY_FLOOR_PACE.value] = ""
-                    record[RaceFields.TWENTY_FLOOR_TIME.value] = ""
-                    record[RaceFields.SIXTY_FLOOR_POSITION.value] = ""
-                    record[RaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value] = ""
-                    record[RaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value] = ""
-                    record[RaceFields.SIXTY_FIVE_FLOOR_PACE.value] = ""
-                    record[RaceFields.SIXTY_FIVE_FLOOR_TIME.value] = ""
-
-                    yield record
-            except ValueError as ve:
-                raise ValueError(f"ln_cnt={ln_cnt}, tk_cnt={tk_cnt},{record}", ve) from ve
-
-
 class CourseRecords(Enum):
     """
     Course records (valid as 2024)
@@ -341,7 +211,6 @@ class CourseRecords(Enum):
     FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
 
-RACE_RESULTS_FIRST_LEVEL = Path(__file__).parent.joinpath("results-first-level-2023.csv")
 RACE_RESULTS_FULL_LEVEL = Path(__file__).parent.joinpath("results-full-level-2023.csv")
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
 

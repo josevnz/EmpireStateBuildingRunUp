@@ -172,11 +172,9 @@ Data cannot be used yet as-is, needs cleaning up and that is the next step in th
 [Getting the data](test/raw_data.txt) is just the first battle of many more to come. [You will notice inconsistencies on the data](https://en.wikibooks.org/wiki/Statistics/Data_Analysis/Data_Cleaning), missing values and in order
 to make your numeric results good, you need to make assumptions.
 
-Luckily for me, the dataset is very small (375+ records, one for each runner) so I was able to come up with a few rules to tidy up the [data file](empirestaterunup/results-first-level-2023.csv) I was going to use during my analysis.
+Luckily for me, the dataset is very small (375+ records, one for each runner) so I was able to come up with a few rules to tidy up the data file I was going to use during my analysis.
 
 I also supplemented my data with another data set that has the countries [3-digit codes](empirestaterunup/country_codes.toml) as well as other details, for a nicer presentation.
-
-The [data_normalizer.raw_read(raw_file: Path) -> Iterable[Dict[str, Any]]](empirestaterunup/runners.py) method does the heavy work of fixing the data for inconsistencies before saving into a CSV format.
 
 There are no hard rules here as cleanup has a high correlation with the data set. For example, to figure out to which wave each runner was assigned I had to make some assumptions based on what I saw the day of the race.
 

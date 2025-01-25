@@ -20,8 +20,8 @@ from textual.screen import ModalScreen, Screen
 from textual.widgets import DataTable, Footer, Header, Label, Button, MarkdownViewer
 import matplotlib.pyplot as plt
 
-from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, count_by_wave, \
-    dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, better_than_median_waves, FastestFilters, \
+from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, \
+    dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, FastestFilters, \
     find_fastest
 from empirestaterunup.data import load_data, df_to_list_of_tuples, load_country_details, \
     lookup_country_by_code, RaceFields, series_to_list_of_tuples, beautify_race_times, \
@@ -43,12 +43,10 @@ class FiveNumberApp(App):
         """
         SUMMARY = 'Summary'
         COUNT_BY_AGE = 'Count By Age'
-        WAVE_BUCKET = 'Wave Bucket'
         GENDER_BUCKET = 'Gender Bucket'
         AGE_BUCKET = 'Age Bucket'
         TIME_BUCKET = 'Time Bucket'
         COUNTRY_COUNTS = 'Country Counts'
-        BETTER_THAN_AVERAGE = 'Better than average Wave Counts'
 
     ENABLE_COMMAND_PALETTE = False
 
@@ -77,14 +75,6 @@ class FiveNumberApp(App):
         """
         Initialize component contents
         """
-        wave_table = self.get_widget_by_id(id=self.NumbersTables.BETTER_THAN_AVERAGE.name, expect_type=DataTable)
-        median_run_time, wave_series = better_than_median_waves(FiveNumberApp.DF)
-        median_run_time_in_minutes = f"{median_run_time.total_seconds()/60.0:.2f} minutes"
-        rows = series_to_list_of_tuples(wave_series)
-        for column in ['Wave', 'Count']:
-            wave_table.add_column(column, key=column)
-        wave_table.add_rows(rows)
-        wave_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         summary_table = self.get_widget_by_id(id=self.NumbersTables.SUMMARY.name, expect_type=DataTable)
         columns = [x.title() for x in FiveNumberApp.FIVE_NUMBER_FIELDS]
@@ -99,35 +89,24 @@ class FiveNumberApp(App):
                 if isinstance(rows[idx], Timedelta):
                     rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
             summary_table.add_row(*rows)
-        summary_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         age_table = self.get_widget_by_id(id=self.NumbersTables.COUNT_BY_AGE.name, expect_type=DataTable)
         adf, age_header = count_by_age(FiveNumberApp.DF)
         for column in age_header:
             age_table.add_column(column, key=column)
         age_table.add_rows(dt_to_sorted_dict(adf).items())
-        age_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         gender_table = self.get_widget_by_id(id=self.NumbersTables.GENDER_BUCKET.name, expect_type=DataTable)
         gdf, gender_header = count_by_gender(FiveNumberApp.DF)
         for column in gender_header:
             gender_table.add_column(column, key=column)
         gender_table.add_rows(dt_to_sorted_dict(gdf).items())
-        gender_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
-
-        wave_table = self.get_widget_by_id(id=self.NumbersTables.WAVE_BUCKET.name, expect_type=DataTable)
-        wdf, wave_header = count_by_wave(FiveNumberApp.DF)
-        for column in wave_header:
-            wave_table.add_column(column, key=column)
-        wave_table.add_rows(dt_to_sorted_dict(wdf).items())
-        wave_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         age_bucket_table = self.get_widget_by_id(id=self.NumbersTables.AGE_BUCKET.name, expect_type=DataTable)
         age_categories, age_cols_head = age_bins(FiveNumberApp.DF)
         for column in age_cols_head:
             age_bucket_table.add_column(column, key=column)
         age_bucket_table.add_rows(dt_to_sorted_dict(age_categories.value_counts()).items())
-        age_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         time_bucket_table = self.get_widget_by_id(id=self.NumbersTables.TIME_BUCKET.name, expect_type=DataTable)
         time_categories, time_cols_head = time_bins(FiveNumberApp.DF)
@@ -135,7 +114,6 @@ class FiveNumberApp(App):
             time_bucket_table.add_column(column, key=column)
         times = dt_to_sorted_dict(time_categories.value_counts()).items()
         time_bucket_table.add_rows(times)
-        time_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         country_counts_table = self.get_widget_by_id(id=self.NumbersTables.COUNTRY_COUNTS.name, expect_type=DataTable)
         countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
@@ -143,7 +121,6 @@ class FiveNumberApp(App):
         for column in ['Country', 'Count']:
             country_counts_table.add_column(column, key=column)
         country_counts_table.add_rows(rows)
-        country_counts_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         self.notify(
             message=f"All metrics were calculated for {FiveNumberApp.DF.shape[0]} runners.",

@@ -95,7 +95,6 @@ class RaceFields(Enum):
     SIXTY_FIVE_FLOOR_DIVISION_POSITION = "65th floor division position"
     SIXTY_FIVE_FLOOR_PACE = '65th floor pace'
     SIXTY_FIVE_FLOOR_TIME = '65th floor time'
-    WAVE = "wave"
     LEVEL = "level"
     URL = "url"
 

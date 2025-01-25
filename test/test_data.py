@@ -1,20 +1,15 @@
 """
 Unit tests for data loading
 """
-import pprint
 import unittest
-from pathlib import Path
 
 from pandas import Series
 
-from empirestaterunup.analyze import better_than_median_waves, find_fastest, FastestFilters
+from empirestaterunup.analyze import find_fastest, FastestFilters
 from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, \
     df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
-    get_categories, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, \
+    get_categories, RaceFields, series_to_list_of_tuples, \
     FIELD_NAMES_AND_POS, CountryColumns
-
-RAW_COPY_PASTE_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.txt")
-RAW_CSV_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.csv")
 
 
 class DataTestCase(unittest.TestCase):
@@ -147,34 +142,6 @@ class DataTestCase(unittest.TestCase):
         df = get_categories(run_data)
         self.assertIsNotNone(df)
         self.assertEqual(375, df.shape[0])
-
-    def test_better_than_median_waves(self):
-        """
-        Get better than median waves
-        """
-        run_data = load_data()
-        self.assertIsNotNone(run_data)
-        median_time, wave_series = better_than_median_waves(run_data)
-        self.assertIsNotNone(median_time)
-        self.assertEqual(43, wave_series.iloc[0])
-        print(median_time)
-        print(wave_series)
-
-    def test_raw_csv_read(self):
-        """
-        Read CSV data
-        """
-        clean_data = list(raw_csv_read(RAW_CSV_RACE_RESULTS))
-        self.assertIsNotNone(clean_data)
-        self.assertEqual(377, len(clean_data))
-        for record in clean_data:
-            for field in FIELD_NAMES:
-                self.assertTrue(field in record.keys())
-            if record[RaceFields.NAME.value] == "Kamila Chomanicova":
-                self.assertEqual(record[RaceFields.AGE.value], 30)
-                self.assertEqual(record[RaceFields.GENDER.value], "F")
-                self.assertEqual(record[RaceFields.SIXTY_FIVE_FLOOR_TIME.value], "00:10:40")
-            pprint.pprint(record)
 
     def test_find_fastest(self):
         """

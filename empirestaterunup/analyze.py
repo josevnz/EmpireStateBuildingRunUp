@@ -8,7 +8,7 @@ from typing import Union, Tuple, Dict, Any
 from datetime import timedelta
 import numpy as np
 import pandas
-from pandas import DataFrame, Categorical, Series, Timedelta
+from pandas import DataFrame, Categorical, Series
 
 from empirestaterunup.data import RaceFields
 
@@ -43,13 +43,6 @@ def count_by_gender(data: DataFrame) -> tuple[DataFrame, tuple]:
     Counts by gender
     """
     return data.groupby(RaceFields.GENDER.value)[RaceFields.GENDER.value].count(), ('Gender', 'Count')
-
-
-def count_by_wave(data: DataFrame) -> tuple[DataFrame, tuple]:
-    """
-    Counts by wave
-    """
-    return data.groupby(RaceFields.WAVE.value)[RaceFields.WAVE.value].count(), ('Wave', 'Count')
 
 
 def dt_to_sorted_dict(df: Union[DataFrame | Series]) -> dict:
@@ -110,16 +103,6 @@ def get_country_counts(df: DataFrame, min_participants: int = 5, max_participant
     min_country_filter = countries_counts[countries_counts.values > min_participants]
     max_country_filter = countries_counts[countries_counts.values < max_participants]
     return countries_counts, min_country_filter, max_country_filter
-
-
-def better_than_median_waves(df: DataFrame) -> Tuple[Timedelta, Series]:
-    """
-    Get runners whose race time is better than the median
-    :param df Dataframe to analyze
-    :return Tuple of median run time, Wave value counts series for values smaller than the median
-    """
-    median = df[RaceFields.TIME.value].median()
-    return median, df[df[RaceFields.TIME.value].values <= median][RaceFields.WAVE.value].value_counts()
 
 
 def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Dict[str, Any]]:

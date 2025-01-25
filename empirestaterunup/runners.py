@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 """
 I wrote this script to normalize the data results from the 'Empire State Building Run-Up', October 4, 2023.
-The race results website doesn't offer an export option and quite honestly writing a web scraper seemed to be overkill.
-So just coping and pasting the 8 pages of results took less time, the data normalizer is quite simple and was used
-to generate a nicer CSV file.
 
 Author Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """

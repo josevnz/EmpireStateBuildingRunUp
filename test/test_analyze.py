@@ -6,7 +6,7 @@ import unittest
 from pandas import DataFrame
 
 from empirestaterunup.analyze import get_5_number, SUMMARY_METRICS, count_by_age, count_by_gender, \
-    dt_to_sorted_dict, get_zscore, get_outliers, age_bins, time_bins, get_country_counts
+    get_zscore, get_outliers, age_bins, time_bins, get_country_counts
 from empirestaterunup.data import load_data, RaceFields
 
 

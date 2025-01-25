@@ -2,13 +2,11 @@
 Data loading logic, after web scraping process is completed.
 author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
-import csv
 import datetime
 import logging
-import math
 from enum import Enum
 from pathlib import Path
-from typing import Iterable, Any, Dict, Tuple, Union, List
+from typing import Any, Dict, Tuple, Union, List
 
 import pandas
 import tomlkit
@@ -30,31 +28,6 @@ BASE_RACE_DATETIME = datetime.datetime(
     second=0,
     microsecond=0
 )
-
-
-class Waves(Enum):
-    """
-    22 Elite male
-    17 Elite female
-    There are some holes, so either some runners did not show up or there was spare capacity.
-    https://runsignup.com/Race/EmpireStateBuildingRunUp/Page-4
-    https://runsignup.com/Race/EmpireStateBuildingRunUp/Page-5
-    I guessed who went on which category, based on the BIB numbers I saw that day
-    """
-    ELITE_MEN = ["Elite Men", [1, 25], BASE_RACE_DATETIME]
-    ELITE_WOMEN = ["Elite Women", [26, 49], BASE_RACE_DATETIME + datetime.timedelta(minutes=2)]
-    PURPLE = ["Specialty", [100, 199], BASE_RACE_DATETIME + datetime.timedelta(minutes=10)]
-    GREEN = ["Sponsors", [200, 299], BASE_RACE_DATETIME + datetime.timedelta(minutes=20)]
-    """
-    The date people applied for the lottery determined the colors?. Let's assume that
-    General Lottery Open: 7/17 9AM- 7/28 11:59PM
-    General Lottery Draw Date: 8/1
-    """
-    ORANGE = ["Tenants", [300, 399], BASE_RACE_DATETIME + datetime.timedelta(minutes=30)]
-    GREY = ["General 1", [400, 499], BASE_RACE_DATETIME + datetime.timedelta(minutes=40)]
-    GOLD = ["General 2", [500, 599], BASE_RACE_DATETIME + datetime.timedelta(minutes=50)]
-    BLACK = ["General 3", [600, 699], BASE_RACE_DATETIME + datetime.timedelta(minutes=60)]
-
 
 """
 Interested only in people who completed the 86 floors. So is either full course or dnf
@@ -106,108 +79,6 @@ POS = 0
 for field in RaceFields:
     FIELD_NAMES_AND_POS[field] = POS
     POS += 1
-
-
-def get_wave_from_bib(bib: int) -> Waves:
-    """
-    Get wave from bib
-    """
-    for wave in Waves:
-        (lower, upper) = wave.value[1]
-        if lower <= bib <= upper:
-            return wave
-    return Waves.BLACK
-
-
-def get_description_for_wave(wave: Waves) -> str:
-    """
-    Get description from wave
-    """
-    return wave.value[0]
-
-
-def get_wave_start_time(wave: Waves) -> datetime:
-    """
-    Get wave start time
-    """
-    return wave.value[2]
-
-
-def raw_csv_read(raw_file: Path) -> Iterable[Dict[str, Any]]:
-    """
-    Get raw CSV
-    """
-    record = {}
-    with open(raw_file, 'r', encoding='utf-8') as raw_csv_file:
-        reader = csv.DictReader(raw_csv_file)
-        row: Dict[str, Any]
-        for row in reader:
-            try:
-                csv_field: str
-                for csv_field in FIELD_NAMES_FOR_SCRAPING:
-                    column_val = row[csv_field].strip()
-                    if csv_field == RaceFields.BIB.value:
-                        bib = int(column_val)
-                        record[csv_field] = bib
-                    elif csv_field in [
-                        RaceFields.GENDER_POSITION.value,
-                        RaceFields.DIVISION_POSITION.value,
-                        RaceFields.OVERALL_POSITION.value,
-                        RaceFields.TWENTY_FLOOR_POSITION.value,
-                        RaceFields.TWENTY_FLOOR_DIVISION_POSITION.value,
-                        RaceFields.TWENTY_FLOOR_GENDER_POSITION.value,
-                        RaceFields.SIXTY_FLOOR_POSITION.value,
-                        RaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value,
-                        RaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value,
-                        RaceFields.AGE.value
-                    ]:
-                        try:
-                            record[csv_field] = int(column_val)
-                        except ValueError:
-                            record[csv_field] = math.nan
-                    elif csv_field == RaceFields.WAVE.value:
-                        record[csv_field] = get_description_for_wave(get_wave_from_bib(bib)).upper()
-                    elif csv_field in [
-                        RaceFields.GENDER.value,
-                        RaceFields.COUNTRY.value
-                    ]:
-                        record[csv_field] = column_val.upper()
-                    elif csv_field in [
-                        RaceFields.CITY.value,
-                        RaceFields.STATE.value,
-
-                    ]:
-                        record[csv_field] = column_val.capitalize()
-                    elif csv_field in [
-                        RaceFields.SIXTY_FIVE_FLOOR_PACE.value,
-                        RaceFields.SIXTY_FIVE_FLOOR_TIME.value,
-                        RaceFields.TWENTY_FLOOR_PACE.value,
-                        RaceFields.TWENTY_FLOOR_TIME.value,
-                        RaceFields.PACE.value,
-                        RaceFields.TIME.value
-                    ]:
-                        parts = column_val.strip().split(':')
-                        for idx in range(0, len(parts)):
-                            if len(parts[idx]) == 1:
-                                parts[idx] = f"0{parts[idx]}"
-                        if len(parts) == 2:
-                            parts.insert(0, "00")
-                        record[csv_field] = ":".join(parts)
-                    else:
-                        record[csv_field] = column_val
-                if record[csv_field] in ['-', '--']:
-                    record[csv_field] = ""
-                yield record
-            except IndexError:
-                logging.exception("Field: %s", csv_field)
-
-
-class CourseRecords(Enum):
-    """
-    Course records (valid as 2024)
-    """
-    MALE = ('Paul Crake', 'Australia', 2003, '9:33')
-    FEMALE = ('Andrea Mayr', 'Austria', 2006, '11:23')
 
 
 RACE_RESULTS_FULL_LEVEL = Path(__file__).parent.joinpath("results-full-level-2023.csv")

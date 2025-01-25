@@ -176,7 +176,7 @@ Luckily for me, the dataset is very small (375+ records, one for each runner) so
 
 I also supplemented my data with another data set that has the countries [3-digit codes](empirestaterunup/country_codes.toml) as well as other details, for a nicer presentation.
 
-There are no hard rules here as cleanup has a high correlation with the data set. For example, to figure out to which wave each runner was assigned I had to make some assumptions based on what I saw the day of the race.
+There are no hard rules here as cleanup has a high correlation with the data set.
 
 Let me show you what I mean with some code:
 
@@ -937,7 +937,7 @@ And the command palette, searching for runners by name:
 This application provides details about the following:
 
 * Count, standard deviation, mean, min, max 45%, 50%, and 75% for age, time, and pace
-* Group and count distribution for Age,  Wave, and Gender
+* Group and count distribution for Age, and Gender
 
 ```shell
 esru_numbers
@@ -946,7 +946,6 @@ esru_numbers
 Some interesting facts about the race:
 
 * Average age is 41 years old and 40 years old is the largest age group
-* The majority number of people belonged to the 'BLACK WAVE'
 * The majority of the people finished the race between 20 and 30 minutes.
 * The youngest runner was 11 years old, oldest was 78
 

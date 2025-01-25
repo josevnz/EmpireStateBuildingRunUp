@@ -6,7 +6,7 @@ import unittest
 from pandas import Series
 
 from empirestaterunup.analyze import find_fastest, FastestFilters
-from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, \
+from empirestaterunup.data import load_data, \
     df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
     get_categories, RaceFields, series_to_list_of_tuples, \
     FIELD_NAMES_AND_POS, CountryColumns
@@ -24,31 +24,6 @@ class DataTestCase(unittest.TestCase):
         self.assertIsNotNone(data)
         for row in data:
             self.assertIsNotNone(row)
-
-    def test_get_wave_from_bib(self):
-        """
-        Get the wave, based on the BIB
-        """
-        self.assertEqual(Waves.ELITE_MEN, get_wave_from_bib(1))
-        self.assertEqual(Waves.ELITE_WOMEN, get_wave_from_bib(26))
-        self.assertEqual(Waves.PURPLE, get_wave_from_bib(100))
-        self.assertEqual(Waves.GREEN, get_wave_from_bib(200))
-        self.assertEqual(Waves.ORANGE, get_wave_from_bib(300))
-        self.assertEqual(Waves.GREY, get_wave_from_bib(400))
-        self.assertEqual(Waves.GOLD, get_wave_from_bib(500))
-        self.assertEqual(Waves.BLACK, get_wave_from_bib(600))
-
-    def test_get_description_for_wave(self):
-        """
-        Get the description for the wave
-        """
-        self.assertEqual(Waves.ELITE_MEN.value[0], get_description_for_wave(Waves.ELITE_MEN))
-
-    def test_get_wave_start_time(self):
-        """
-        Get the wave start time
-        """
-        self.assertEqual(Waves.ELITE_MEN.value[-1], get_wave_start_time(Waves.ELITE_MEN))
 
     def test_to_list_of_tuples(self):
         """

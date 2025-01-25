@@ -7,7 +7,6 @@ to generate a nicer CSV file.
 
 Author Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
-import csv
 from pathlib import Path
 from argparse import ArgumentParser
 import logging
@@ -15,8 +14,7 @@ import logging
 from matplotlib import pyplot as plt
 
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
-from empirestaterunup.data import load_data, load_country_details, \
-    FIELD_NAMES_FOR_SCRAPING
+from empirestaterunup.data import load_data, load_country_details
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 

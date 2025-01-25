@@ -16,7 +16,7 @@ from matplotlib import pyplot as plt
 
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
 from empirestaterunup.data import load_data, load_country_details, \
-    raw_csv_read, FIELD_NAMES_FOR_SCRAPING
+    FIELD_NAMES_FOR_SCRAPING
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
@@ -141,41 +141,3 @@ def run_browser():
     app.title = "Race runners".title()
     app.sub_title = f"Browse details: {app.df.shape[0]}"
     app.run()
-
-
-def run_csv_cleaner():
-    """
-    Entry point for CSV cleaner
-    """
-    parser = ArgumentParser(description=__doc__)
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        default=False,
-        help='Enable verbose mode'
-    )
-    parser.add_argument(
-        '--raw_file',
-        type=Path,
-        required=True,
-        help='Raw file'
-    )
-    parser.add_argument(
-        'report_file',
-        type=Path,
-        help='New report file'
-    )
-    options = parser.parse_args()
-    try:
-        with open(options.report_file, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=FIELD_NAMES_FOR_SCRAPING, quoting=csv.QUOTE_NONNUMERIC)
-            writer.writeheader()
-            for row in raw_csv_read(options.raw_file):
-                try:
-                    writer.writerow(row)
-                    if options.verbose:
-                        logging.warning(row)
-                except ValueError as ve:
-                    raise ValueError(f"row={row}", ve) from ve
-    except KeyboardInterrupt:
-        pass

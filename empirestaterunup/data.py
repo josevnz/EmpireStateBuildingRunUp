@@ -152,7 +152,7 @@ def load_json_data(data_file: Path = None, remove_dnf: bool = True, default_year
 
     # Flatten inner keys, ignore others
     new_cols = defaultdict(list)
-    for position, split_details in pandas.Series(df['split_data']).to_dict().items():
+    for _, split_details in pandas.Series(df['split_data']).to_dict().items():
         for split_detail in split_details:
             name = split_detail['name'].lower()
             time = split_detail['time_ms']

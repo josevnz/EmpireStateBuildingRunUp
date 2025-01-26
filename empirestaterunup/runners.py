@@ -11,7 +11,7 @@ import logging
 from matplotlib import pyplot as plt
 
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
-from empirestaterunup.data import load_data, load_country_details
+from empirestaterunup.data import load_csv_data, load_country_details
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 
@@ -31,9 +31,9 @@ def run_5_number():
     options = parser.parse_args()
     app = FiveNumberApp()
     if options.results:
-        FiveNumberApp.DF = load_data(options.results[0])
+        FiveNumberApp.DF = load_csv_data(options.results[0])
     else:
-        FiveNumberApp.DF = load_data()
+        FiveNumberApp.DF = load_csv_data()
     app.title = "Five Number Summary".title()
     app.sub_title = f"Runners: {FiveNumberApp.DF.shape[0]}"
     app.run()
@@ -53,9 +53,9 @@ def run_outlier():
     )
     options = parser.parse_args()
     if options.results:
-        OutlierApp.DF = load_data(options.results[0])
+        OutlierApp.DF = load_csv_data(options.results[0])
     else:
-        OutlierApp.DF = load_data()
+        OutlierApp.DF = load_csv_data()
     app = OutlierApp()
     app.title = "Outliers Summary".title()
     app.sub_title = f"Runners: {OutlierApp.DF.shape[0]}"
@@ -126,7 +126,7 @@ def run_browser():
     df = None
     country_df = None
     if options.results:
-        df = load_data(options.results[0])
+        df = load_csv_data(options.results[0])
     if options.country:
         country_df = load_country_details(options.country)
     app = BrowserApp(

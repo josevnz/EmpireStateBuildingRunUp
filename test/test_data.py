@@ -2,25 +2,38 @@
 Unit tests for data loading
 """
 import unittest
+import warnings
 
 from pandas import Series
 
 from empirestaterunup.analyze import find_fastest, FastestFilters
-from empirestaterunup.data import load_data, \
+from empirestaterunup.data import load_csv_data, \
     df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
-    get_categories, RaceFields, series_to_list_of_tuples, \
-    FIELD_NAMES_AND_POS, CountryColumns
+    get_categories, CsvRaceFields, series_to_list_of_tuples, \
+    CountryColumns, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
 
 
 class DataTestCase(unittest.TestCase):
     """
     Uni tests for data loading
     """
-    def test_load_data(self):
+
+    def test_load_json_data(self):
         """
-        Load data
+        Load data in JSON format from https://github.com/josevnz/athlinks-races/
         """
-        data = load_data()
+        for year in RACE_RESULTS_JSON_FULL_LEVEL:
+            warnings.warn(UserWarning(f"Loading {year}={RACE_RESULTS_JSON_FULL_LEVEL[year]}"))
+            data = load_json_data(RACE_RESULTS_JSON_FULL_LEVEL[year])
+            self.assertIsNotNone(data)
+            for row in data:
+                self.assertIsNotNone(row)
+
+    def test_load_csv_data(self):
+        """
+        Load data in CSV format
+        """
+        data = load_csv_data()
         self.assertIsNotNone(data)
         for row in data:
             self.assertIsNotNone(row)
@@ -29,7 +42,7 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_data()
+        data = load_csv_data()
         self.assertIsNotNone(data)
 
         header, rows = df_to_list_of_tuples(data)
@@ -51,9 +64,9 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_data()
+        data = load_csv_data()
         self.assertIsNotNone(data)
-        countries: Series = data[RaceFields.COUNTRY.value]
+        countries: Series = data[CsvRaceFields.COUNTRY.value]
         rows = series_to_list_of_tuples(countries)
         self.assertIsNotNone(rows)
 
@@ -71,28 +84,29 @@ class DataTestCase(unittest.TestCase):
         """
         Lookup country codes. Also checks than the country data is complete
         """
-        run_data = load_data()
-        self.assertIsNotNone(run_data)
         country_data = load_country_details()
         self.assertIsNotNone(country_data)
-        _, rows = df_to_list_of_tuples(run_data)
-        country_idx = FIELD_NAMES_AND_POS[RaceFields.COUNTRY]
-        for row in rows:
-            country_code = row[country_idx]
-            name, details = lookup_country_by_code(
-                country_data=country_data,
-                three_letter_code=country_code
-            )
+        for country_code in ["US", "USA", "VE", "VEN", "IT"]:
+            name, details = lookup_country_by_code(country_data=country_data, letter_code=country_code)
             self.assertIsNotNone(name)
             self.assertIsNotNone(details)
             for column in [country.value for country in CountryColumns if country.value != CountryColumns.NAME.value]:
                 self.assertIsNotNone(details[column])
 
+        for country_code in ["XX", "XXX"]:
+            self.assertIsNone(lookup_country_by_code(country_data=country_data, letter_code=country_code))
+        
+        try:
+            _ = lookup_country_by_code(country_data=country_data, letter_code="XXXX")
+            self.fail("I was expected an exception for an invalid country code!")
+        except ValueError:
+            pass
+
     def test_get_times(self):
         """
         Get times from the data
         """
-        run_data = load_data()
+        run_data = load_csv_data()
         self.assertIsNotNone(run_data)
         df = get_times(run_data)
         self.assertIsNotNone(df)
@@ -102,7 +116,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get positions from the data
         """
-        run_data = load_data()
+        run_data = load_csv_data()
         self.assertIsNotNone(run_data)
         df = get_positions(run_data)
         self.assertIsNotNone(df)
@@ -112,7 +126,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get categories from the data
         """
-        run_data = load_data()
+        run_data = load_csv_data()
         self.assertIsNotNone(run_data)
         df = get_categories(run_data)
         self.assertIsNotNone(df)
@@ -122,7 +136,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get the fastest runners on the dataset
         """
-        run_data = load_data()
+        run_data = load_csv_data()
         self.assertIsNotNone(run_data)
 
         fastest = find_fastest(run_data, FastestFilters.GENDER)

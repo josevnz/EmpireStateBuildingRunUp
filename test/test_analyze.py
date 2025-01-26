@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 from empirestaterunup.analyze import get_5_number, SUMMARY_METRICS, count_by_age, count_by_gender, \
     get_zscore, get_outliers, age_bins, time_bins, get_country_counts
-from empirestaterunup.data import load_data, RaceFields
+from empirestaterunup.data import load_csv_data, CsvRaceFields
 
 
 class AnalyzeTestCase(unittest.TestCase):
@@ -21,7 +21,7 @@ class AnalyzeTestCase(unittest.TestCase):
         """
         Refresh data setup, class level
         """
-        cls.df = load_data()
+        cls.df = load_csv_data()
 
     def test_get_5_number(self):
         """
@@ -61,7 +61,7 @@ class AnalyzeTestCase(unittest.TestCase):
             self.assertIsNotNone(outliers)
             self.assertLess(0, outliers.shape[0])
             # print(f"Column {column.title()}:\n{outliers}")
-            if column != RaceFields.AGE.value:
+            if column != CsvRaceFields.AGE.value:
                 for bib, timedelta in outliers.items():
                     print(f"{column} {bib}: {timedelta.total_seconds()/60.0}")
 

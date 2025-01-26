@@ -524,14 +524,15 @@ For example, to make sure the analytics work as expected I wrote a test module c
 import unittest
 from pandas import DataFrame
 from empirestaterunup.analyze import get_country_counts
-from empirestaterunup.data import load_data
+from empirestaterunup.data import load_csv_data
+
 
 class AnalyzeTestCase(unittest.TestCase):
     df: DataFrame
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.df = load_data()
+        cls.df = load_csv_data()
 
     def test_get_country_counts(self):
         country_counts, min_countries, max_countries = get_country_counts(df=AnalyzeTestCase.df)

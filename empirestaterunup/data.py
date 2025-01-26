@@ -36,6 +36,9 @@ class Level(Enum):
 
 
 class RaceFields(Enum):
+    """
+    Fields
+    """
     BIB = "bib"
     NAME = "name"
     GENDER = "gender"
@@ -49,6 +52,9 @@ class RaceFields(Enum):
 
 
 class CsvRaceFields(Enum):
+    """
+    Transitional fields while CSV format is deprecated
+    """
     BIB = "bib"
     NAME = "name"
     OVERALL_POSITION = "overall position"

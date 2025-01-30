@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 from empirestaterunup.analyze import get_5_number, SUMMARY_METRICS, count_by_age, count_by_gender, \
     get_zscore, get_outliers, age_bins, time_bins, get_country_counts
-from empirestaterunup.data import load_csv_data, CsvRaceFields
+from empirestaterunup.data import RaceFields, load_json_data
 
 
 class AnalyzeTestCase(unittest.TestCase):
@@ -21,14 +21,14 @@ class AnalyzeTestCase(unittest.TestCase):
         """
         Refresh data setup, class level
         """
-        cls.df = load_csv_data()
+        cls.df = load_json_data()
 
     def test_get_5_number(self):
         """
         Get 5 number metrics
         """
         for key in SUMMARY_METRICS:
-            ndf = get_5_number(criteria=key, data=AnalyzeTestCase.df)
+            ndf = get_5_number(criteria=key.value, data=AnalyzeTestCase.df)
             self.assertIsNotNone(ndf)
 
     def test_count_by_age(self):
@@ -49,7 +49,7 @@ class AnalyzeTestCase(unittest.TestCase):
         """
         Get the z-score for summary
         """
-        z_score = get_zscore(df=AnalyzeTestCase.df, column=SUMMARY_METRICS[0])
+        z_score = get_zscore(df=AnalyzeTestCase.df, column=SUMMARY_METRICS[0].value)
         self.assertIsNotNone(z_score)
 
     def test_get_outliers(self):
@@ -57,13 +57,15 @@ class AnalyzeTestCase(unittest.TestCase):
         Analyze outliers
         """
         for column in SUMMARY_METRICS:
-            outliers = get_outliers(df=AnalyzeTestCase.df, column=column, std_threshold=3)
+            outliers = get_outliers(df=AnalyzeTestCase.df, column=column.value, std_threshold=3)
             self.assertIsNotNone(outliers)
             self.assertLess(0, outliers.shape[0])
-            # print(f"Column {column.title()}:\n{outliers}")
-            if column != CsvRaceFields.AGE.value:
+            if column != RaceFields.AGE.value:
                 for bib, timedelta in outliers.items():
-                    print(f"{column} {bib}: {timedelta.total_seconds()/60.0}")
+                    print(f"{column} {bib}: {timedelta}")
+            else:
+                for bib, age in outliers.items():
+                    print(f"{column} {bib}: {age}")
 
     def test_age_bins(self):
         """
@@ -95,7 +97,7 @@ class AnalyzeTestCase(unittest.TestCase):
         """
         country_counts, min_countries, max_countries = get_country_counts(df=AnalyzeTestCase.df)
         self.assertIsNotNone(country_counts)
-        self.assertEqual(2, country_counts['JPN'])
+        self.assertEqual(2, country_counts['Japan'])
         self.assertIsNotNone(min_countries)
         self.assertEqual(3, min_countries.shape[0])
         self.assertIsNotNone(max_countries)

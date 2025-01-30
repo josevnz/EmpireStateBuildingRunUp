@@ -2,7 +2,6 @@
 Collection of applications to display race findings
 author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
-import re
 from enum import Enum
 from functools import partial
 from pathlib import Path
@@ -23,9 +22,9 @@ import matplotlib.pyplot as plt
 from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, \
     dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, FastestFilters, \
     find_fastest
-from empirestaterunup.data import load_csv_data, df_to_list_of_tuples, load_country_details, \
-    lookup_country_by_code, CsvRaceFields, series_to_list_of_tuples, beautify_race_times, \
-    CSV_FIELD_NAMES_AND_POS
+from empirestaterunup.data import df_to_list_of_tuples, load_country_details, \
+    RaceFields, series_to_list_of_tuples, beautify_race_times, \
+    CSV_FIELD_NAMES_AND_POS, load_json_data
 
 
 class FiveNumberApp(App):
@@ -81,7 +80,7 @@ class FiveNumberApp(App):
         columns.insert(0, 'Summary')
         summary_table.add_columns(*columns)
         for metric in SUMMARY_METRICS:
-            ndf = get_5_number(criteria=metric, data=FiveNumberApp.DF)
+            ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
             rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
             rows.insert(0, metric.title())
             rows[1] = int(rows[1])
@@ -169,55 +168,25 @@ class RunnerDetailScreen(ModalScreen):
         """
         UI element initial layout
         """
-        bib_idx = CSV_FIELD_NAMES_AND_POS[CsvRaceFields.BIB]
+        bib_idx = CSV_FIELD_NAMES_AND_POS[RaceFields.BIB]
         bibs = [self.row[bib_idx]]
         columns, details = df_to_list_of_tuples(self.df, bibs)
         self.log.info(f"Columns: {columns}")
         self.log.info(f"Details: {details}")
         row_markdown = ""
-        position_markdown = {}
-        split_markdown = {}
+        """
         for legend in ['full', '20th', '65th']:
             position_markdown[legend] = ''
             split_markdown[legend] = ''
+        """
+
         for i in range(0, len(columns)):
             column = columns[i]
             detail = details[0][i]
-            if re.search('pace|time', column):
-                if re.search('20th', column):
-                    split_markdown['20th'] += f"\n* **{column.title()}:** {detail}"
-                elif re.search('65th', column):
-                    split_markdown['65th'] += f"\n* **{column.title()}:** {detail}"
-                else:
-                    split_markdown['full'] += f"\n* **{column.title()}:** {detail}"
-            elif re.search('position', column):
-                if re.search('20th', column):
-                    position_markdown['20th'] += f"\n* **{column.title()}:** {detail}"
-                elif re.search('65th', column):
-                    position_markdown['65th'] += f"\n* **{column.title()}:** {detail}"
-                else:
-                    position_markdown['full'] += f"\n* **{column.title()}:** {detail}"
-            elif re.search('url|bib', column):
-                pass  # Skip uninteresting columns
-            else:
-                row_markdown += f"\n* **{column.title()}:** {detail}"
+            row_markdown += f"\n* **{column.title()}:** {detail}"
         yield MarkdownViewer(f"""# Full Course Race details
 ## Runner BIO (BIB: {bibs[0]})
-{row_markdown}
-## Positions
-### 20th floor        
-{position_markdown['20th']}
-### 65th floor        
-{position_markdown['65th']}
-### Full course        
-{position_markdown['full']}                
-## Race time split   
-### 20th floor        
-{split_markdown['20th']}
-### 65th floor        
-{split_markdown['65th']}
-### Full course        
-{split_markdown['full']}         
+{row_markdown}         
         """)
         btn = Button("Close", variant="primary", id="close")
         btn.tooltip = "Back to main screen"
@@ -254,14 +223,14 @@ class OutlierApp(App):
         """
         yield Header(show_clock=True)
         for column_name in SUMMARY_METRICS:
-            table = DataTable(id=f'{column_name}_outlier')
+            table = DataTable(id=f'col_{column_name.name}_outlier')
             table.cursor_type = 'row'
             table.zebra_stripes = True
             table.tooltip = "Get runner details"
-            if column_name == CsvRaceFields.AGE.value:
-                label = Label(f"{column_name} (older) outliers (Minutes):".title())
+            if column_name == RaceFields.AGE:
+                label = Label(f"{column_name.value} (older) outliers (Minutes):".title())
             else:
-                label = Label(f"{column_name} (slower) outliers (Minutes):".title())
+                label = Label(f"{column_name.value} (slower) outliers (Minutes):".title())
             yield Vertical(
                 label,
                 table
@@ -273,16 +242,15 @@ class OutlierApp(App):
         Initialize UI elements
         """
         for column in SUMMARY_METRICS:
-            table = self.get_widget_by_id(f'{column}_outlier', expect_type=DataTable)
-            columns = [x.title() for x in ['bib', column]]
+            table = self.get_widget_by_id(f'col_{column.name}_outlier', expect_type=DataTable)
+            columns = [x.title() for x in ['bib', column.value]]
             table.add_columns(*columns)
-            outliers = get_outliers(df=OutlierApp.DF, column=column)
-            if column == CsvRaceFields.AGE.value:
+            outliers = get_outliers(df=OutlierApp.DF, column=column.value)
+            if column == RaceFields.AGE:
                 transformed_outliers = outliers.to_dict().items()
             else:
                 transformed_outliers = []
                 for bib, timedelta in outliers.items():
-                    # print(f"{column} {bib}: {timedelta.total_seconds()/60.0}")
                     transformed_outliers.append((bib, f"{timedelta.total_seconds()/60.0:.2f}"))
             table.add_rows(transformed_outliers)
 
@@ -319,7 +287,7 @@ class Plotter:
         """
         Constructor, load data from file using helper.
         """
-        self.df = load_csv_data(data_file)
+        self.df = load_json_data(data_file)
 
     def plot_age(self, gtype: str):
         """
@@ -327,7 +295,7 @@ class Plotter:
         Borrowed coloring recipe for histogram from Matplotlib documentation
         """
         if gtype == 'box':
-            series = self.df[CsvRaceFields.AGE.value]
+            series = self.df[RaceFields.AGE.value]
             _, ax = plt.subplots(layout='constrained')
             ax.boxplot(series)
             ax.set_title("Age details")
@@ -335,14 +303,9 @@ class Plotter:
             ax.set_xlabel('Age')
             ax.grid(True)
         elif gtype == 'hist':
-            series = self.df[CsvRaceFields.AGE.value]
+            series = self.df[RaceFields.AGE.value]
             _, ax = plt.subplots(layout='constrained')
             _, bins, _ = ax.hist(series, density=False, alpha=0.75)
-            # fractions = n / n.max()
-            # norm = colors.Normalize(fractions.min(), fractions.max())
-            # for frac, patch in zip(fractions, patches):
-            #    color = plt.cm.viridis(norm(frac))
-            #    patch.set_facecolor(color)
             ax.set_xlabel('Age [years]')
             ax.set_ylabel('Count')
             ax.set_title(f'Age details for {series.shape[0]} racers\nBins={len(bins)}')
@@ -353,7 +316,7 @@ class Plotter:
         Plot country details
         """
         fastest = find_fastest(self.df, FastestFilters.COUNTRY)
-        series = self.df[CsvRaceFields.COUNTRY.value].value_counts()
+        series = self.df[RaceFields.COUNTRY.value].value_counts()
         series.sort_values(inplace=True)
         _, ax = plt.subplots(layout='constrained')
         rects = ax.barh(series.keys(), series.values)
@@ -373,7 +336,7 @@ class Plotter:
         """
         Plot gender details
         """
-        series = self.df[CsvRaceFields.GENDER.value].value_counts()
+        series = self.df[RaceFields.GENDER.value].value_counts()
         _, ax = plt.subplots(layout='constrained')
         wedges, _, _ = ax.pie(
             series.values,
@@ -424,13 +387,13 @@ class BrowserAppCommand(Provider):
         df = browser_app.df
         for row_key in self.table.rows:
             row = self.table.get_row(row_key)
-            for name in [CsvRaceFields.BIB, CsvRaceFields.NAME, CsvRaceFields.OVERALL_POSITION, CsvRaceFields.COUNTRY]:
+            for name in [RaceFields.BIB, RaceFields.NAME, RaceFields.COUNTRY]:
                 idx = CSV_FIELD_NAMES_AND_POS[name]
-                name_idx = CSV_FIELD_NAMES_AND_POS[CsvRaceFields.NAME]
+                name_idx = CSV_FIELD_NAMES_AND_POS[RaceFields.NAME]
                 searchable = str(row[idx])
                 score = matcher.match(searchable)
                 if score > 0:
-                    if name == CsvRaceFields.NAME:
+                    if name == RaceFields.NAME:
                         details = f"{searchable} - {name.value}"
                     else:
                         details = f"{searchable} - {name.value} ({row[name_idx]})"
@@ -471,23 +434,16 @@ class BrowserApp(App):
             self.country_data = country_data
 
         if df is None or df.empty:
-            self.df = load_csv_data()
+            self.df = load_json_data()
         else:
             self.df = df
 
-        for three_letter_code in set(self.df[CsvRaceFields.COUNTRY.value].tolist()):
-            filtered_country = lookup_country_by_code(
-                country_data=self.country_data,
-                letter_code=three_letter_code
-            )
-            country_name: str = three_letter_code
-            if filtered_country:
-                country_name = filtered_country[0]
-            filtered = self.df[CsvRaceFields.COUNTRY.value] == three_letter_code
+        for filtered_country in set(self.df[RaceFields.COUNTRY.value].tolist()):
+            filtered = self.df[RaceFields.COUNTRY.value] == filtered_country
             self.df.loc[
                 filtered,
-                [CsvRaceFields.COUNTRY.value]
-            ] = [country_name.strip().title()]
+                [RaceFields.COUNTRY.value]
+            ] = [filtered_country.strip().title()]
 
     def action_quit_app(self):
         """
@@ -516,7 +472,7 @@ class BrowserApp(App):
         for number, row in enumerate(rows[0:], start=1):
             label = Text(str(number), style="#B0FC38 italic")
             table.add_row(*row, label=label)
-        table.sort('overall position')
+        table.sort(RaceFields.TIME.value)
 
         self.notify(
             message=f"Loaded all data for {self.df.shape[0]} runners.",

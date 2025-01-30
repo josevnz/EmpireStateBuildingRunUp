@@ -51,45 +51,14 @@ class RaceFields(Enum):
     SIXTY_FIVE_FLOOR_TIME = '65th floor'
 
 
-class CsvRaceFields(Enum):
-    """
-    Transitional fields while CSV format is deprecated
-    """
-    BIB = "bib"
-    NAME = "name"
-    OVERALL_POSITION = "overall position"
-    TIME = "time"
-    GENDER = "gender"
-    GENDER_POSITION = "gender position"
-    AGE = "age"
-    DIVISION_POSITION = "division position"
-    COUNTRY = "country"
-    STATE = "state"
-    CITY = "city"
-    PACE = "pace"
-    TWENTY_FLOOR_POSITION = "20th floor position"
-    TWENTY_FLOOR_GENDER_POSITION = "20th floor gender position"
-    TWENTY_FLOOR_DIVISION_POSITION = "20th floor division position"
-    TWENTY_FLOOR_PACE = '20th floor pace'
-    TWENTY_FLOOR_TIME = '20th floor time'
-    SIXTY_FLOOR_POSITION = "65th floor position"
-    SIXTY_FIVE_FLOOR_GENDER_POSITION = "65th floor gender position"
-    SIXTY_FIVE_FLOOR_DIVISION_POSITION = "65th floor division position"
-    SIXTY_FIVE_FLOOR_PACE = '65th floor pace'
-    SIXTY_FIVE_FLOOR_TIME = '65th floor time'
-    LEVEL = "level"
-    URL = "url"
-
-
-CVS_FIELD_NAMES = [x.value for x in CsvRaceFields if x != CsvRaceFields.URL]
-CSV_FIELD_NAMES_FOR_SCRAPING = [x.value for x in CsvRaceFields]
-CSV_FIELD_NAMES_AND_POS: Dict[CsvRaceFields, int] = {}
+CVS_FIELD_NAMES = [x.value for x in RaceFields]
+CSV_FIELD_NAMES_FOR_SCRAPING = [x.value for x in RaceFields]
+CSV_FIELD_NAMES_AND_POS: Dict[RaceFields, int] = {}
 POS = 0
-for field in CsvRaceFields:
+for field in RaceFields:
     CSV_FIELD_NAMES_AND_POS[field] = POS
     POS += 1
 
-RACE_RESULTS_CSV_2023_FULL_LEVEL = Path(__file__).parent.joinpath("results-full-level-2023.csv")
 RACE_RESULTS_JSON_FULL_LEVEL = {
     2023: Path(__file__).parent.joinpath("results-2023.json"),
     2024: Path(__file__).parent.joinpath("results-2024.json")
@@ -138,6 +107,7 @@ def load_json_data(data_file: Path = None, remove_dnf: bool = True, default_year
     # Normalize Age
     median_age = df[RaceFields.AGE.value].median()
     df[RaceFields.AGE.value] = df[RaceFields.AGE.value].fillna(median_age)
+    df[RaceFields.AGE.value] = df[RaceFields.AGE.value].apply(lambda x: median_age if x == 0 else x)
     df[RaceFields.AGE.value] = df[RaceFields.AGE.value].astype(int)
 
     # Normalize state and city
@@ -192,103 +162,6 @@ def load_json_data(data_file: Path = None, remove_dnf: bool = True, default_year
     return df
 
 
-def load_csv_data(data_file: Path = None, remove_dnf: bool = True) -> DataFrame:
-    """
-    * The code remove by default the DNF runners to avoid distortion on the results.
-    * Replace unknown/ nan values with the median, to make analysis easier and avoid distortions
-    """
-    def_file = RACE_RESULTS_CSV_2023_FULL_LEVEL if data_file is None else data_file
-    df = pandas.read_csv(def_file)
-
-    if remove_dnf:
-        df.drop(df[df.level == 'DNF'].index, inplace=True)
-
-    for time_field in [
-        CsvRaceFields.PACE.value,
-        CsvRaceFields.TIME.value,
-        CsvRaceFields.TWENTY_FLOOR_PACE.value,
-        CsvRaceFields.TWENTY_FLOOR_TIME.value,
-        CsvRaceFields.SIXTY_FIVE_FLOOR_PACE.value,
-        CsvRaceFields.SIXTY_FIVE_FLOOR_TIME.value
-    ]:
-        try:
-            df[time_field] = pandas.to_timedelta(df[time_field])
-        except ValueError as ve:
-            raise ValueError(f'{time_field}={df[time_field]}', ve) from ve
-    df['finishtimestamp'] = BASE_RACE_DATETIME[2023] + df[CsvRaceFields.TIME.value]
-
-    # Normalize Age
-    median_age = df[CsvRaceFields.AGE.value].median()
-    df[CsvRaceFields.AGE.value] = df[CsvRaceFields.AGE.value].fillna(median_age)
-    df[CsvRaceFields.AGE.value] = df[CsvRaceFields.AGE.value].astype(int)
-
-    # Normalize state and city
-    df.replace({CsvRaceFields.STATE.value: {'-': ''}}, inplace=True)
-    df[CsvRaceFields.STATE.value] = df[CsvRaceFields.STATE.value].fillna('')
-    df[CsvRaceFields.CITY.value] = df[CsvRaceFields.CITY.value].fillna('')
-
-    # Normalize overall position, 3 levels
-    median_pos = df[CsvRaceFields.OVERALL_POSITION.value].median()
-    df[CsvRaceFields.OVERALL_POSITION.value] = df[CsvRaceFields.OVERALL_POSITION.value].fillna(median_pos)
-    df[CsvRaceFields.OVERALL_POSITION.value] = df[CsvRaceFields.OVERALL_POSITION.value].astype(int)
-    median_pos = df[CsvRaceFields.TWENTY_FLOOR_POSITION.value].median()
-    df[CsvRaceFields.TWENTY_FLOOR_POSITION.value] = df[CsvRaceFields.TWENTY_FLOOR_POSITION.value].fillna(median_pos)
-    df[CsvRaceFields.TWENTY_FLOOR_POSITION.value] = df[CsvRaceFields.TWENTY_FLOOR_POSITION.value].astype(int)
-    median_pos = df[CsvRaceFields.SIXTY_FLOOR_POSITION.value].median()
-    df[CsvRaceFields.SIXTY_FLOOR_POSITION.value] = df[CsvRaceFields.SIXTY_FLOOR_POSITION.value].fillna(median_pos)
-    df[CsvRaceFields.SIXTY_FLOOR_POSITION.value] = df[CsvRaceFields.SIXTY_FLOOR_POSITION.value].astype(int)
-
-    # Normalize gender position, 3 levels
-    median_gender_pos = df[CsvRaceFields.GENDER_POSITION.value].median()
-    df[CsvRaceFields.GENDER_POSITION.value] = df[CsvRaceFields.GENDER_POSITION.value].fillna(median_gender_pos)
-    df[CsvRaceFields.GENDER_POSITION.value] = df[CsvRaceFields.GENDER_POSITION.value].astype(int)
-
-    median_gender_pos = df[CsvRaceFields.TWENTY_FLOOR_GENDER_POSITION.value].median()
-    df[CsvRaceFields.TWENTY_FLOOR_GENDER_POSITION.value] = df[CsvRaceFields.TWENTY_FLOOR_GENDER_POSITION.value].fillna(
-        median_gender_pos)
-    df[CsvRaceFields.TWENTY_FLOOR_GENDER_POSITION.value] = df[CsvRaceFields.TWENTY_FLOOR_GENDER_POSITION.value].astype(
-        int)
-    median_gender_pos = df[CsvRaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value].median()
-    df[CsvRaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value] = df[
-        CsvRaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value].fillna(median_gender_pos)
-    df[CsvRaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value] = df[
-        CsvRaceFields.SIXTY_FIVE_FLOOR_GENDER_POSITION.value].astype(int)
-
-    # Normalize age/ division position, 3 levels
-    median_div_pos = df[CsvRaceFields.DIVISION_POSITION.value].median()
-    df[CsvRaceFields.DIVISION_POSITION.value] = df[CsvRaceFields.DIVISION_POSITION.value].fillna(median_div_pos)
-    df[CsvRaceFields.DIVISION_POSITION.value] = df[CsvRaceFields.DIVISION_POSITION.value].astype(int)
-    median_div_pos = df[CsvRaceFields.TWENTY_FLOOR_DIVISION_POSITION.value].median()
-    df[CsvRaceFields.TWENTY_FLOOR_DIVISION_POSITION.value] = df[
-        CsvRaceFields.TWENTY_FLOOR_DIVISION_POSITION.value].fillna(
-        median_div_pos)
-    df[CsvRaceFields.TWENTY_FLOOR_DIVISION_POSITION.value] = df[
-        CsvRaceFields.TWENTY_FLOOR_DIVISION_POSITION.value].astype(
-        int)
-    median_div_pos = df[CsvRaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value].median()
-    df[CsvRaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value] = df[
-        CsvRaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value].fillna(median_div_pos)
-    df[CsvRaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value] = df[
-        CsvRaceFields.SIXTY_FIVE_FLOOR_DIVISION_POSITION.value].astype(int)
-
-    # Normalize 65th floor pace and time
-    sixty_five_floor_pace_median = df[CsvRaceFields.SIXTY_FIVE_FLOOR_PACE.value].median()
-    sixty_five_floor_time_median = df[CsvRaceFields.SIXTY_FIVE_FLOOR_TIME.value].median()
-    df[CsvRaceFields.SIXTY_FIVE_FLOOR_PACE.value] = df[CsvRaceFields.SIXTY_FIVE_FLOOR_PACE.value].fillna(
-        sixty_five_floor_pace_median)
-    df[CsvRaceFields.SIXTY_FIVE_FLOOR_TIME.value] = df[CsvRaceFields.SIXTY_FIVE_FLOOR_TIME.value].fillna(
-        sixty_five_floor_time_median)
-
-    # Normalize BIB and make it the index
-    df[CsvRaceFields.BIB.value] = df[CsvRaceFields.BIB.value].astype(int)
-    df.set_index(CsvRaceFields.BIB.value, inplace=True)
-
-    # URL was useful during scraping, not needed for analysis
-    df.drop([CsvRaceFields.URL.value], axis=1, inplace=True)
-
-    return df
-
-
 def df_to_list_of_tuples(
         df: DataFrame,
         bibs: list[int] = None
@@ -303,7 +176,7 @@ def df_to_list_of_tuples(
     if not bibs:
         filtered = bib_as_column
     else:
-        filtered = bib_as_column[bib_as_column[CsvRaceFields.BIB.value].isin(bibs)]
+        filtered = bib_as_column[bib_as_column[RaceFields.BIB.value].isin(bibs)]
     column_names = CVS_FIELD_NAMES
     rows = []
     for _, r in filtered.iterrows():

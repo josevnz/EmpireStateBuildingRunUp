@@ -7,10 +7,10 @@ import warnings
 from pandas import Series
 
 from empirestaterunup.analyze import find_fastest, FastestFilters
-from empirestaterunup.data import load_csv_data, \
+from empirestaterunup.data import \
     df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
-    get_categories, CsvRaceFields, series_to_list_of_tuples, \
-    CountryColumns, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
+    get_categories, series_to_list_of_tuples, \
+    CountryColumns, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL, RaceFields
 
 
 class DataTestCase(unittest.TestCase):
@@ -29,11 +29,11 @@ class DataTestCase(unittest.TestCase):
             for row in data:
                 self.assertIsNotNone(row)
 
-    def test_load_csv_data(self):
+    def test_load_json_data2(self):
         """
         Load data in CSV format
         """
-        data = load_csv_data()
+        data = load_json_data()
         self.assertIsNotNone(data)
         for row in data:
             self.assertIsNotNone(row)
@@ -42,13 +42,13 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_csv_data()
+        data = load_json_data()
         self.assertIsNotNone(data)
 
         header, rows = df_to_list_of_tuples(data)
         self.assertIsNotNone(header)
         self.assertIsNotNone(rows)
-        self.assertEqual(375, len(rows))
+        self.assertEqual(376, len(rows))
 
         header, rows = df_to_list_of_tuples(data, bibs=[537, 19])
         self.assertIsNotNone(header)
@@ -64,9 +64,9 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_csv_data()
+        data = load_json_data()
         self.assertIsNotNone(data)
-        countries: Series = data[CsvRaceFields.COUNTRY.value]
+        countries: Series = data[RaceFields.COUNTRY.value]
         rows = series_to_list_of_tuples(countries)
         self.assertIsNotNone(rows)
 
@@ -106,37 +106,37 @@ class DataTestCase(unittest.TestCase):
         """
         Get times from the data
         """
-        run_data = load_csv_data()
+        run_data = load_json_data()
         self.assertIsNotNone(run_data)
         df = get_times(run_data)
         self.assertIsNotNone(df)
-        self.assertEqual(375, df.shape[0])
+        self.assertEqual(376, df.shape[0])
 
     def test_get_positions(self):
         """
         Get positions from the data
         """
-        run_data = load_csv_data()
+        run_data = load_json_data()
         self.assertIsNotNone(run_data)
         df = get_positions(run_data)
         self.assertIsNotNone(df)
-        self.assertEqual(375, df.shape[0])
+        self.assertEqual(376, df.shape[0])
 
     def test_get_categories(self):
         """
         Get categories from the data
         """
-        run_data = load_csv_data()
+        run_data = load_json_data()
         self.assertIsNotNone(run_data)
         df = get_categories(run_data)
         self.assertIsNotNone(df)
-        self.assertEqual(375, df.shape[0])
+        self.assertEqual(376, df.shape[0])
 
     def test_find_fastest(self):
         """
         Get the fastest runners on the dataset
         """
-        run_data = load_csv_data()
+        run_data = load_json_data()
         self.assertIsNotNone(run_data)
 
         fastest = find_fastest(run_data, FastestFilters.GENDER)

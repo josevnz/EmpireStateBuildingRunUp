@@ -11,9 +11,10 @@ import logging
 from matplotlib import pyplot as plt
 
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
-from empirestaterunup.data import load_country_details, load_json_data
+from empirestaterunup.data import load_country_details, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
+RESULTS = list(RACE_RESULTS_JSON_FULL_LEVEL.keys())
 
 
 def run_5_number():
@@ -24,14 +25,16 @@ def run_5_number():
     parser.add_argument(
         "results",
         action="store",
-        type=Path,
-        nargs="*",
+        type=int,
+        choices=RESULTS,
+        default=RESULTS[0],
+        nargs='?',
         help="Race results."
     )
     options = parser.parse_args()
     app = FiveNumberApp()
     if options.results:
-        FiveNumberApp.DF = load_json_data(options.results[0])
+        FiveNumberApp.DF = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
     else:
         FiveNumberApp.DF = load_json_data()
     app.title = "Five Number Summary".title()
@@ -47,13 +50,15 @@ def run_outlier():
     parser.add_argument(
         "results",
         action="store",
-        type=Path,
-        nargs="*",
+        type=int,
+        choices=RESULTS,
+        default=RESULTS[0],
+        nargs='?',
         help="Race results."
     )
     options = parser.parse_args()
     if options.results:
-        OutlierApp.DF = load_json_data(options.results[0])
+        OutlierApp.DF = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
     else:
         OutlierApp.DF = load_json_data()
     app = OutlierApp()
@@ -84,14 +89,16 @@ def simple_plot():
     parser.add_argument(
         "results",
         action="store",
-        type=Path,
-        nargs="*",
+        type=int,
+        choices=RESULTS,
+        default=RESULTS[0],
+        nargs='?',
         help="Race results."
     )
     options = parser.parse_args()
     plt.style.use('fivethirtyeight')  # Common style for all the plots
     if options.results:
-        pzs = Plotter(options.results[0])
+        pzs = Plotter(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
     else:
         pzs = Plotter()
     if options.report == 'age':
@@ -118,21 +125,18 @@ def run_browser():
     parser.add_argument(
         "results",
         action="store",
-        type=Path,
-        nargs="*",
+        type=int,
+        choices=RESULTS,
+        default=RESULTS[0],
+        nargs='?',
         help="Race results."
     )
     options = parser.parse_args()
-    df = None
     country_df = None
-    if options.results:
-        df = load_json_data(options.results[0])
+    df = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
     if options.country:
         country_df = load_country_details(options.country)
-    app = BrowserApp(
-        df=df,
-        country_data=country_df
-    )
+    app = BrowserApp(df=df, country_data=country_df)
     app.title = "Race runners".title()
     app.sub_title = f"Browse details: {app.df.shape[0]}"
     app.run()

@@ -82,7 +82,7 @@ class FiveNumberApp(App):
         for metric in SUMMARY_METRICS:
             ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
             rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
-            rows.insert(0, metric.title())
+            rows.insert(0, metric.value.title())
             rows[1] = int(rows[1])
             for idx in range(2, len(rows)):  # Pretty print running times
                 if isinstance(rows[idx], Timedelta):

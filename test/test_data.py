@@ -31,7 +31,7 @@ class DataTestCase(unittest.TestCase):
 
     def test_load_json_data2(self):
         """
-        Load data in CSV format
+        Load data in CSV format, using defaults
         """
         data = load_json_data()
         self.assertIsNotNone(data)
@@ -42,7 +42,7 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_json_data()
+        data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(data)
 
         header, rows = df_to_list_of_tuples(data)
@@ -64,11 +64,12 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_json_data()
-        self.assertIsNotNone(data)
-        countries: Series = data[RaceFields.COUNTRY.value]
-        rows = series_to_list_of_tuples(countries)
-        self.assertIsNotNone(rows)
+        for data_file in RACE_RESULTS_JSON_FULL_LEVEL.values():
+            data = load_json_data(data_file=data_file)
+            self.assertIsNotNone(data)
+            countries: Series = data[RaceFields.COUNTRY.value]
+            rows = series_to_list_of_tuples(countries)
+            self.assertIsNotNone(rows)
 
     def test_load_country_details(self):
         """
@@ -106,7 +107,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get times from the data
         """
-        run_data = load_json_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
         df = get_times(run_data)
         self.assertIsNotNone(df)
@@ -116,7 +117,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get positions from the data
         """
-        run_data = load_json_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
         df = get_positions(run_data)
         self.assertIsNotNone(df)
@@ -126,7 +127,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get categories from the data
         """
-        run_data = load_json_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
         df = get_categories(run_data)
         self.assertIsNotNone(df)
@@ -136,7 +137,7 @@ class DataTestCase(unittest.TestCase):
         """
         Get the fastest runners on the dataset
         """
-        run_data = load_json_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
 
         fastest = find_fastest(run_data, FastestFilters.GENDER)

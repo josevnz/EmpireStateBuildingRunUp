@@ -4,6 +4,7 @@ Unit tests for application
 import unittest
 from textual.widgets import DataTable, MarkdownViewer
 from empirestaterunup.apps import BrowserApp
+from empirestaterunup.data import load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
 
 
 class AppTestCase(unittest.IsolatedAsyncioTestCase):
@@ -14,7 +15,8 @@ class AppTestCase(unittest.IsolatedAsyncioTestCase):
         """
         Simulate running browser app, with some commands
         """
-        app = BrowserApp()
+        df = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
+        app = BrowserApp(df=df)
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
             await pilot.press("ctrl+\\")

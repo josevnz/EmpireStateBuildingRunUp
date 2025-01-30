@@ -22,7 +22,7 @@ class AnalyzeTestCase(unittest.TestCase):
         """
         Refresh data setup, class level
         """
-        for year, data_file in RACE_RESULTS_JSON_FULL_LEVEL.items():
+        for _, data_file in RACE_RESULTS_JSON_FULL_LEVEL.items():
             AnalyzeTestCase.df_list.append(load_json_data(data_file=data_file))
 
     def test_get_5_number(self):

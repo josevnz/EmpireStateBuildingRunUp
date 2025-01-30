@@ -96,7 +96,7 @@ class DataTestCase(unittest.TestCase):
 
         for country_code in ["XX", "XXX"]:
             self.assertIsNone(lookup_country_by_code(country_data=country_data, letter_code=country_code))
-        
+
         try:
             _ = lookup_country_by_code(country_data=country_data, letter_code="XXXX")
             self.fail("I was expected an exception for an invalid country code!")

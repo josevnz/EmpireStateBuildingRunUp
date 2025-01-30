@@ -174,12 +174,6 @@ class RunnerDetailScreen(ModalScreen):
         self.log.info(f"Columns: {columns}")
         self.log.info(f"Details: {details}")
         row_markdown = ""
-        """
-        for legend in ['full', '20th', '65th']:
-            position_markdown[legend] = ''
-            split_markdown[legend] = ''
-        """
-
         for i in range(0, len(columns)):
             column = columns[i]
             detail = details[0][i]

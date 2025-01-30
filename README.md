@@ -117,7 +117,7 @@ esru_server --application esru_numbers
 
 # Or if you have an external results file:
 
-sru_server --application esru_browser empirestaterunup/results-full-level-2023.csv
+sru_server --application esru_browser empirestaterunup/results-2023.json
 ```
 
 ## Getting latest race results

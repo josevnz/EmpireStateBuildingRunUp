@@ -59,7 +59,7 @@ Python [Pandas DataFrames](https://pandas.pydata.org/pandas-docs/stable/user_gui
 ```shell
 >>> # Using custom load_data function that returns a Panda DataFrame
 >>> from empirestaterunup.data import load_data
->>> load_data('empirestaterunup/results-full-level-2023.csv')
+>>> load_data('empirestaterunup/results-2023.json')
                     name  overall position            time gender  gender position  age  ...  65th floor division position 65th floor pace 65th floor time       wave        level     finishtimestamp
 bib                                                                                      ...                                                                                                          
 19         Wai Ching Soh                 1 0 days 00:10:36      M                1   29  ...                             1 0 days 00:54:03 0 days 00:07:34  ELITE MEN  Full Course 2023-09-04 20:10:36

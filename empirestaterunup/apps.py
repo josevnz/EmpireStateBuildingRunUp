@@ -285,7 +285,7 @@ class Plotter:
             startangle=90,
             explode=(0.1, 0, 0)
         )
-        ax.set_title = f"Gender participation"
+        ax.set_title = "Gender participation"
         ax.set_xlabel(f'Gender (Race year: {self.year})')
         # Legend with the fastest runners by gender
         fastest = find_fastest(self.df, FastestFilters.GENDER)
@@ -386,5 +386,5 @@ class BrowserApp(App):
         """
         table = event.data_table
         row = table.get_row(event.row_key)
-        runner_detail_screen = RunnerDetailScreen(row_key=event.row_key, table=table, row=row)
+        runner_detail_screen = RunnerDetailScreen(table=table, row=row)
         self.push_screen(runner_detail_screen)

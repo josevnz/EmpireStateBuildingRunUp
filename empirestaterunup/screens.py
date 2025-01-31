@@ -1,3 +1,6 @@
+"""
+Module to handle all the sub-screen details.
+"""
 from typing import List, Any, Dict, Union, Tuple
 from textual import on
 from textual.app import ComposeResult
@@ -19,7 +22,6 @@ class RunnerDetailScreen(ModalScreen):
             name: str | None = None,
             ident: str | None = None,
             classes: str | None = None,
-            row_key: Any | None = None,
             row: List[Any] | None = None,
             table: DataTable | None = None,
             debug: bool = True,
@@ -29,7 +31,6 @@ class RunnerDetailScreen(ModalScreen):
         """
         super().__init__(name, ident, classes)
         self.row = row
-        self.row_key = row_key
         self.table = table
         self.debug = debug
 
@@ -43,9 +44,8 @@ class RunnerDetailScreen(ModalScreen):
         if self.table:
             col_map: Dict[int, str] = {idx: val.label.plain for idx, val in zip(range(0, len(self.table.columns)), self.table.columns.values())}
             if self.debug:
-                col_def: Dict[Any, Any] = {key: val for key, val in self.table.columns.items()}
+                col_def = dict(self.table.columns.items())
                 self.log.info(f"Columns def: {col_def}")
-                self.log.info(f"Row key: {self.row_key}")
                 self.log.info(f"Row: {self.row}")
                 self.log.info(f"Col Map: {col_map}")
             for idx, col_name in col_map.items():
@@ -69,7 +69,7 @@ class RunnerDetailScreen(ModalScreen):
 
 class OutlierDetailScreen(ModalScreen):
     """
-
+    Display outliers details
     """
     ENABLE_COMMAND_PALETTE = False
     CSS_PATH = "runner_details.tcss"

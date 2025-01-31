@@ -1,3 +1,6 @@
+"""
+Module to handle all the providers' logic.
+"""
 from functools import partial
 from typing import Any
 
@@ -46,7 +49,7 @@ class BrowserAppCommand(Provider):
                 details = f"{searchable} - {name.value}"
             else:
                 details = f"{searchable} - {name.value} ({row[name_idx]})"
-            runner_detail_screen = RunnerDetailScreen(row_key=row_key, table=self.table, row=row)
+            runner_detail_screen = RunnerDetailScreen(table=self.table, row=row)
             yield DiscoveryHit(
                 command=partial(browser_app.push_screen, runner_detail_screen),
                 help=f"{name.value}",
@@ -71,7 +74,7 @@ class BrowserAppCommand(Provider):
                         details = f"{searchable} - {name.value}"
                     else:
                         details = f"{searchable} - {name.value} ({row[name_idx]})"
-                    runner_detail_screen = RunnerDetailScreen(row_key=row_key, table=self.table, row=row)
+                    runner_detail_screen = RunnerDetailScreen(table=self.table, row=row)
                     yield Hit(
                         score=score,
                         match_display=matcher.highlight(f"{searchable}"),

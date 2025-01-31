@@ -318,23 +318,8 @@ class BrowserApp(App):
         Constructor
         """
         super().__init__(driver_class, css_path, watch_css)
-
-        if not country_data:
-            self.country_data = load_country_details()
-        else:
-            self.country_data = country_data
-
-        if df is None or df.empty:
-            self.df = load_json_data()
-        else:
-            self.df = df
-
-        for filtered_country in set(self.df[RaceFields.COUNTRY.value].tolist()):
-            filtered = self.df[RaceFields.COUNTRY.value] == filtered_country
-            self.df.loc[
-                filtered,
-                [RaceFields.COUNTRY.value]
-            ] = [filtered_country.strip().title()]
+        self.country_data = load_country_details() if not country_data else country_data
+        self.df = load_json_data() if (df is None or df.empty) else df
 
     def action_quit_app(self):
         """

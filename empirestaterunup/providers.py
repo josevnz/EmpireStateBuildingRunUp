@@ -20,12 +20,18 @@ class BrowserAppCommand(Provider):
     Racer browser details on the Command palette
     """
 
-    def __init__(self, screen: Screen[Any], match_style: Style | None = None) -> None:
+    def __init__(
+            self, screen: Screen[Any],
+            match_style: Style | None = None,
+            debug: bool = True
+    ) -> None:
         """
         Constructor, load data from file using helper.
         """
         super().__init__(screen, match_style)
         self.table = None
+        self.debug = debug
+        self.log = self.app.log
 
     async def startup(self) -> None:
         """
@@ -33,28 +39,32 @@ class BrowserAppCommand(Provider):
         """
         browser_app = self.app
         self.table = browser_app.query(DataTable).first()
+        if self.debug:
+            self.log.info(f"Table on provider: {self.table}")
+            self.log.info(f"Rows:{len(self.table.rows)}")
 
     async def discover(self) -> DiscoveryHit:
         """
         Pre-populate the palette with the results of the fastest racer
         """
         browser_app = self.screen.app
-        row_key = self.table.rows[0]
-        row = self.table.get_row(row_key)
-        for name in PALETTE_FIELDS:
-            idx = FIELD_NAMES_AND_POS[name]
-            name_idx = FIELD_NAMES_AND_POS[RaceFields.NAME]
-            searchable = str(row[idx])
-            if name == RaceFields.NAME:
-                details = f"{searchable} - {name.value}"
-            else:
-                details = f"{searchable} - {name.value} ({row[name_idx]})"
-            runner_detail_screen = RunnerDetailScreen(table=self.table, row=row)
-            yield DiscoveryHit(
-                command=partial(browser_app.push_screen, runner_detail_screen),
-                help=f"{name.value}",
-                display=f"{details}"
-            )
+        for row_key in self.table.rows:
+            row = self.table.get_row(row_key)
+            for name in PALETTE_FIELDS:
+                idx = FIELD_NAMES_AND_POS[name]
+                name_idx = FIELD_NAMES_AND_POS[RaceFields.NAME]
+                searchable = str(row[idx])
+                if name == RaceFields.NAME:
+                    details = f"{searchable} - {name.value}"
+                else:
+                    details = f"{searchable} - {name.value} ({row[name_idx]})"
+                runner_detail_screen = RunnerDetailScreen(table=self.table, row=row)
+                yield DiscoveryHit(
+                        command=partial(browser_app.push_screen, runner_detail_screen),
+                        display=f"Field: {name.value.title()}",
+                        help=f"{details}"
+                )
+            break
 
     async def search(self, query: str) -> Hit:
         """
@@ -74,7 +84,8 @@ class BrowserAppCommand(Provider):
                         details = f"{searchable} - {name.value}"
                     else:
                         details = f"{searchable} - {name.value} ({row[name_idx]})"
-                    runner_detail_screen = RunnerDetailScreen(table=self.table, row=row)
+                    runner_detail_screen = RunnerDetailScreen(
+                        table=self.table, row=row)
                     yield Hit(
                         score=score,
                         match_display=matcher.highlight(f"{searchable}"),

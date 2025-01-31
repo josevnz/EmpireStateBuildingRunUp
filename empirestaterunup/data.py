@@ -158,7 +158,7 @@ def load_json_data(
         try:
             df[time_field] = pandas.to_timedelta(df[time_field], unit="milliseconds")
             if use_pretty:
-                df[time_field] = df[time_field].apply(lambda x: PrettyDuration(x))
+                df[time_field] = df[time_field].apply(PrettyDuration)
         except ValueError as ve:
             raise ValueError(f'{time_field}={df[time_field]}', ve) from ve
     # df['finishtimestamp'] = BASE_RACE_DATETIME[default_year] + df[RaceFields.TIME.value]
@@ -311,9 +311,9 @@ class PrettyDuration:
         self.duration = duration
 
     def __convert_timedelta__(self):
-        days, seconds = self.duration.days, self.duration.seconds
+        seconds = self.duration.seconds
         minutes = (seconds % 3600) // 60
-        seconds = (seconds % 60)
+        seconds = seconds % 60
         return minutes, seconds
 
     def __str__(self):

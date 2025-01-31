@@ -8,7 +8,7 @@ from pandas import DataFrame
 
 from empirestaterunup.analyze import get_5_number, SUMMARY_METRICS, count_by_age, count_by_gender, \
     get_zscore, get_outliers, age_bins, time_bins, get_country_counts
-from empirestaterunup.data import RaceFields, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
+from empirestaterunup.data import load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
 
 
 class AnalyzeTestCase(unittest.TestCase):
@@ -66,12 +66,8 @@ class AnalyzeTestCase(unittest.TestCase):
             outliers = get_outliers(df=self.df_list[0], column=column.value, std_threshold=3)
             self.assertIsNotNone(outliers)
             self.assertLess(0, outliers.shape[0])
-            if column != RaceFields.AGE.value:
-                for bib, timedelta in outliers.items():
-                    print(f"{column} {bib}: {timedelta}")
-            else:
-                for bib, age in outliers.items():
-                    print(f"{column} {bib}: {age}")
+            for bib, value in outliers.items():
+                print(f"{column} {bib}: {value}")
 
     def test_age_bins(self):
         """

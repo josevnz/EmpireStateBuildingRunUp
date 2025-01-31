@@ -181,12 +181,14 @@ class OutlierApp(App):
             columns = [x.title() for x in ['bib', column.value]]
             table.add_columns(*columns)
             outliers = get_outliers(df=OutlierApp.DF, column=column.value)
+            self.log.info(f"Outliers {column}: {outliers} ({len(outliers.keys())})")
             if column == RaceFields.AGE:
                 transformed_outliers = outliers.to_dict().items()
             else:
                 transformed_outliers = []
                 for bib, timedelta in outliers.items():
                     transformed_outliers.append((bib, f"{timedelta.total_seconds()/60.0:.2f}"))
+            self.log.info(f"Transformed Outliers {column}: {transformed_outliers}")
             table.add_rows(transformed_outliers)
 
         self.notify(

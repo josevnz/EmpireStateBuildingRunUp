@@ -58,6 +58,7 @@ RACE_RESULTS_JSON_FULL_LEVEL = {
     2023: Path(__file__).parent.joinpath("results-2023.json"),
     2024: Path(__file__).parent.joinpath("results-2024.json")
 }
+DEFAULT_YEAR = 2024
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
 
 

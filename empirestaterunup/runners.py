@@ -11,7 +11,7 @@ import logging
 from matplotlib import pyplot as plt
 
 from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
-from empirestaterunup.data import load_country_details, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
+from empirestaterunup.data import load_country_details, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL, DEFAULT_YEAR
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 RESULTS = list(RACE_RESULTS_JSON_FULL_LEVEL.keys())
@@ -27,7 +27,7 @@ def run_5_number():
         action="store",
         type=int,
         choices=RESULTS,
-        default=RESULTS[0],
+        default=DEFAULT_YEAR,
         nargs='?',
         help="Race results."
     )
@@ -52,7 +52,7 @@ def run_outlier():
         action="store",
         type=int,
         choices=RESULTS,
-        default=RESULTS[0],
+        default=DEFAULT_YEAR,
         nargs='?',
         help="Race results."
     )
@@ -91,7 +91,7 @@ def simple_plot():
         action="store",
         type=int,
         choices=RESULTS,
-        default=RESULTS[0],
+        default=DEFAULT_YEAR,
         nargs='?',
         help="Race results."
     )
@@ -127,7 +127,7 @@ def run_browser():
         action="store",
         type=int,
         choices=RESULTS,
-        default=RESULTS[0],
+        default=DEFAULT_YEAR,
         nargs='?',
         help="Race results."
     )

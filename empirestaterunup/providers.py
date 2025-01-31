@@ -45,7 +45,7 @@ class BrowserAppCommand(Provider):
 
     async def discover(self) -> DiscoveryHit:
         """
-        Pre-populate the palette with the results of the fastest racer
+        Pre-populate the palette with results, to give an idea how the search works
         """
         browser_app = self.screen.app
         for row_key in self.table.rows:

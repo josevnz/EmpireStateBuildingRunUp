@@ -299,7 +299,8 @@ class Plotter:
 
 class BrowserApp(App):
     """
-    User browser detail application
+    Racer detail browser  application
+    Shows racers for a given year on a table.
     """
     BINDINGS = [("q", "quit_app", "Quit")]
     CSS_PATH = "browser.tcss"

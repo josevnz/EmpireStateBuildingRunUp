@@ -58,9 +58,9 @@ def run_outlier():
     )
     options = parser.parse_args()
     if options.results:
-        OutlierApp.DF = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
+        OutlierApp.DF = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results], use_pretty=False)
     else:
-        OutlierApp.DF = load_json_data()
+        OutlierApp.DF = load_json_data(use_pretty=False)
     app = OutlierApp()
     app.title = "Outliers Summary".title()
     app.sub_title = f"Runners: {OutlierApp.DF.shape[0]} (Year: {options.results})"
@@ -133,9 +133,9 @@ def run_browser():
     )
     options = parser.parse_args()
     country_df = None
-    df = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
+    df = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results], use_pretty=True)
     if options.country:
-        country_df = load_country_details(options.country)
+        country_df = load_country_details(data_file=options.country)
     app = BrowserApp(df=df, country_data=country_df)
     app.title = "Race runners".title()
     app.sub_title = f"Browse details: {app.df.shape[0]} (Year: {options.results})"

@@ -225,7 +225,7 @@ class Plotter:
         """
         Constructor, load data from file using helper.
         """
-        self.df = load_json_data(data_file)
+        self.df = load_json_data(data_file=data_file, use_pretty=False)
         self.year = year
 
     def plot_age(self, gtype: str):

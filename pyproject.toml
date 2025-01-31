@@ -19,7 +19,7 @@ dev = [
 
 [project]
 name = "EmpireStateRunUp"
-version = "0.1.1"
+version = "0.2.0"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -40,7 +40,8 @@ dependencies = [
     "textual-serve==1.1.1",
     "rich==13.9.4",
     "numpy==1.26.4",
-    "matplotlib==3.8.3"
+    "matplotlib==3.8.3",
+    "tomlkit==0.13.2"
 ]
 license = {file = "LICENSE"}
 [project.scripts]
@@ -59,7 +60,7 @@ where = ["."]
 exclude = ["test*"]
 
 [tool.setuptools.package-data]
-empirestaterunup = ["*.txt", "*.tcss", "*.csv"]
+empirestaterunup = ["*.txt", "*.tcss", "*.json", "*.toml"]
 images = ["*.png", "*.svg"]
 
 

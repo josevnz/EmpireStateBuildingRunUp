@@ -1,67 +1,54 @@
 """
 Unit tests for data loading
 """
-import pprint
 import unittest
-from pathlib import Path
+import warnings
 
 from pandas import Series
 
-from empirestaterunup.analyze import better_than_median_waves, find_fastest, FastestFilters
-from empirestaterunup.data import load_data, Waves, get_wave_from_bib, get_description_for_wave, get_wave_start_time, df_to_list_of_tuples, load_country_details, lookup_country_by_code, COUNTRY_COLUMNS, get_times, get_positions, get_categories, raw_copy_paste_read, raw_csv_read, RaceFields, FIELD_NAMES, series_to_list_of_tuples, FIELD_NAMES_AND_POS
-RAW_COPY_PASTE_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.txt")
-RAW_CSV_RACE_RESULTS = Path(__file__).parent.joinpath("raw_data.csv")
+from empirestaterunup.analyze import find_fastest, FastestFilters
+from empirestaterunup.data import \
+    df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
+    get_categories, series_to_list_of_tuples, \
+    CountryColumns, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL, RaceFields
 
 
 class DataTestCase(unittest.TestCase):
     """
     Uni tests for data loading
     """
-    def test_load_data(self):
+
+    def test_load_json_data(self):
         """
-        Load data
+        Load data in JSON format from https://github.com/josevnz/athlinks-races/
         """
-        data = load_data()
+        for year in RACE_RESULTS_JSON_FULL_LEVEL:
+            warnings.warn(UserWarning(f"Loading {year}={RACE_RESULTS_JSON_FULL_LEVEL[year]}"))
+            data = load_json_data(RACE_RESULTS_JSON_FULL_LEVEL[year])
+            self.assertIsNotNone(data)
+            for row in data:
+                self.assertIsNotNone(row)
+
+    def test_load_json_data2(self):
+        """
+        Load data in CSV format, using defaults
+        """
+        data = load_json_data()
         self.assertIsNotNone(data)
         for row in data:
             self.assertIsNotNone(row)
-
-    def test_get_wave_from_bib(self):
-        """
-        Get the wave, based on the BIB
-        """
-        self.assertEqual(Waves.ELITE_MEN, get_wave_from_bib(1))
-        self.assertEqual(Waves.ELITE_WOMEN, get_wave_from_bib(26))
-        self.assertEqual(Waves.PURPLE, get_wave_from_bib(100))
-        self.assertEqual(Waves.GREEN, get_wave_from_bib(200))
-        self.assertEqual(Waves.ORANGE, get_wave_from_bib(300))
-        self.assertEqual(Waves.GREY, get_wave_from_bib(400))
-        self.assertEqual(Waves.GOLD, get_wave_from_bib(500))
-        self.assertEqual(Waves.BLACK, get_wave_from_bib(600))
-
-    def test_get_description_for_wave(self):
-        """
-        Get the description for the wave
-        """
-        self.assertEqual(Waves.ELITE_MEN.value[0], get_description_for_wave(Waves.ELITE_MEN))
-
-    def test_get_wave_start_time(self):
-        """
-        Get the wave start time
-        """
-        self.assertEqual(Waves.ELITE_MEN.value[-1], get_wave_start_time(Waves.ELITE_MEN))
 
     def test_to_list_of_tuples(self):
         """
         Conversion
         """
-        data = load_data()
+        data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(data)
 
         header, rows = df_to_list_of_tuples(data)
         self.assertIsNotNone(header)
         self.assertIsNotNone(rows)
-        self.assertEqual(375, len(rows))
+        self.assertEqual(376, len(rows))
 
         header, rows = df_to_list_of_tuples(data, bibs=[537, 19])
         self.assertIsNotNone(header)
@@ -77,114 +64,80 @@ class DataTestCase(unittest.TestCase):
         """
         Conversion
         """
-        data = load_data()
-        self.assertIsNotNone(data)
-        countries: Series = data[RaceFields.COUNTRY.value]
-        rows = series_to_list_of_tuples(countries)
-        self.assertIsNotNone(rows)
+        for data_file in RACE_RESULTS_JSON_FULL_LEVEL.values():
+            data = load_json_data(data_file=data_file)
+            self.assertIsNotNone(data)
+            countries: Series = data[RaceFields.COUNTRY.value]
+            rows = series_to_list_of_tuples(countries)
+            self.assertIsNotNone(rows)
 
     def test_load_country_details(self):
         """
         Load country details
         """
-        data = load_country_details()
-        self.assertIsNotNone(data)
-        countries = data['name']
+        countries = load_country_details()
         self.assertIsNotNone(countries)
-        for _, country in data.iterrows():
-            self.assertIsNotNone(country.iloc[2])
+        for name, data in countries.items():
+            self.assertIsNotNone(name)
+            self.assertIsNotNone(data)
 
     def test_country_lookup(self):
         """
-        Lookup country codes
+        Lookup country codes. Also checks than the country data is complete
         """
-        run_data = load_data()
-        self.assertIsNotNone(run_data)
         country_data = load_country_details()
         self.assertIsNotNone(country_data)
-        _, rows = df_to_list_of_tuples(run_data)
-        country_idx = FIELD_NAMES_AND_POS[RaceFields.COUNTRY]
-        for row in rows:
-            country_code = row[country_idx]
-            country_df = lookup_country_by_code(
-                df=country_data,
-                three_letter_code=country_code
-            )
-            self.assertIsNotNone(country_df)
-            for column in COUNTRY_COLUMNS:
-                self.assertIsNotNone(country_df[column])
+        for country_code in ["US", "USA", "VE", "VEN", "IT"]:
+            name, details = lookup_country_by_code(country_data=country_data, letter_code=country_code)
+            self.assertIsNotNone(name)
+            self.assertIsNotNone(details)
+            for column in [country.value for country in CountryColumns if country.value != CountryColumns.NAME.value]:
+                self.assertIsNotNone(details[column])
+
+        for country_code in ["XX", "XXX"]:
+            self.assertIsNone(lookup_country_by_code(country_data=country_data, letter_code=country_code))
+
+        try:
+            _ = lookup_country_by_code(country_data=country_data, letter_code="XXXX")
+            self.fail("I was expected an exception for an invalid country code!")
+        except ValueError:
+            pass
 
     def test_get_times(self):
         """
         Get times from the data
         """
-        run_data = load_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
         df = get_times(run_data)
         self.assertIsNotNone(df)
-        self.assertEqual(375, df.shape[0])
+        self.assertEqual(376, df.shape[0])
 
     def test_get_positions(self):
         """
         Get positions from the data
         """
-        run_data = load_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
         df = get_positions(run_data)
         self.assertIsNotNone(df)
-        self.assertEqual(375, df.shape[0])
+        self.assertEqual(376, df.shape[0])
 
     def test_get_categories(self):
         """
         Get categories from the data
         """
-        run_data = load_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
         df = get_categories(run_data)
         self.assertIsNotNone(df)
-        self.assertEqual(375, df.shape[0])
-
-    def test_better_than_median_waves(self):
-        """
-        Get better than median waves
-        """
-        run_data = load_data()
-        self.assertIsNotNone(run_data)
-        median_time, wave_series = better_than_median_waves(run_data)
-        self.assertIsNotNone(median_time)
-        self.assertEqual(43, wave_series.iloc[0])
-        print(median_time)
-        print(wave_series)
-
-    def test_raw_copy_paste_read(self):
-        """
-        Raw copy paste from data loading, no manipulations
-        """
-        clean_data = list(raw_copy_paste_read(RAW_COPY_PASTE_RACE_RESULTS))
-        self.assertIsNotNone(clean_data)
-        self.assertEqual(375, len(clean_data))
-
-    def test_raw_csv_read(self):
-        """
-        Read CSV data
-        """
-        clean_data = list(raw_csv_read(RAW_CSV_RACE_RESULTS))
-        self.assertIsNotNone(clean_data)
-        self.assertEqual(377, len(clean_data))
-        for record in clean_data:
-            for field in FIELD_NAMES:
-                self.assertTrue(field in record.keys())
-            if record[RaceFields.NAME.value] == "Kamila Chomanicova":
-                self.assertEqual(record[RaceFields.AGE.value], 30)
-                self.assertEqual(record[RaceFields.GENDER.value], "F")
-                self.assertEqual(record[RaceFields.SIXTY_FIVE_FLOOR_TIME.value], "00:10:40")
-            pprint.pprint(record)
+        self.assertEqual(376, df.shape[0])
 
     def test_find_fastest(self):
         """
         Get the fastest runners on the dataset
         """
-        run_data = load_data()
+        run_data = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[2023])
         self.assertIsNotNone(run_data)
 
         fastest = find_fastest(run_data, FastestFilters.GENDER)

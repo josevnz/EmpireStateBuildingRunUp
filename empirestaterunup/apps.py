@@ -2,31 +2,27 @@
 Collection of applications to display race findings
 author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
-import re
 from enum import Enum
-from functools import partial
 from pathlib import Path
-from typing import Type, Any, List
+from typing import Type
 
-# from matplotlib import colors
 from pandas import DataFrame, Timedelta
-from rich.style import Style
 from rich.text import Text
 from textual import on
 from textual.app import ComposeResult, App, CSSPathType
-from textual.command import Provider, Hit
 from textual.containers import Vertical
 from textual.driver import Driver
-from textual.screen import ModalScreen, Screen
-from textual.widgets import DataTable, Footer, Header, Label, Button, MarkdownViewer
+from textual.widgets import DataTable, Footer, Header, Label
 import matplotlib.pyplot as plt
 
-from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, count_by_wave, \
-    dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, better_than_median_waves, FastestFilters, \
+from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, \
+    dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, FastestFilters, \
     find_fastest
-from empirestaterunup.data import load_data, df_to_list_of_tuples, load_country_details, \
-    lookup_country_by_code, CountryColumns, RaceFields, series_to_list_of_tuples, beautify_race_times, \
-    FIELD_NAMES_AND_POS
+from empirestaterunup.data import df_to_list_of_tuples, load_country_details, \
+    RaceFields, series_to_list_of_tuples, beautify_race_times, \
+    load_json_data
+from empirestaterunup.providers import BrowserAppCommand
+from empirestaterunup.screens import RunnerDetailScreen, OutlierDetailScreen
 
 
 class FiveNumberApp(App):
@@ -44,12 +40,10 @@ class FiveNumberApp(App):
         """
         SUMMARY = 'Summary'
         COUNT_BY_AGE = 'Count By Age'
-        WAVE_BUCKET = 'Wave Bucket'
         GENDER_BUCKET = 'Gender Bucket'
         AGE_BUCKET = 'Age Bucket'
         TIME_BUCKET = 'Time Bucket'
         COUNTRY_COUNTS = 'Country Counts'
-        BETTER_THAN_AVERAGE = 'Better than average Wave Counts'
 
     ENABLE_COMMAND_PALETTE = False
 
@@ -78,57 +72,38 @@ class FiveNumberApp(App):
         """
         Initialize component contents
         """
-        wave_table = self.get_widget_by_id(id=self.NumbersTables.BETTER_THAN_AVERAGE.name, expect_type=DataTable)
-        median_run_time, wave_series = better_than_median_waves(FiveNumberApp.DF)
-        median_run_time_in_minutes = f"{median_run_time.total_seconds()/60.0:.2f} minutes"
-        rows = series_to_list_of_tuples(wave_series)
-        for column in ['Wave', 'Count']:
-            wave_table.add_column(column, key=column)
-        wave_table.add_rows(rows)
-        wave_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         summary_table = self.get_widget_by_id(id=self.NumbersTables.SUMMARY.name, expect_type=DataTable)
         columns = [x.title() for x in FiveNumberApp.FIVE_NUMBER_FIELDS]
-        columns.insert(0, 'Summary')
+        columns.insert(0, 'Summary (Minutes)')
         summary_table.add_columns(*columns)
         for metric in SUMMARY_METRICS:
-            ndf = get_5_number(criteria=metric, data=FiveNumberApp.DF)
+            ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
             rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
-            rows.insert(0, metric.title())
+            rows.insert(0, metric.value.title())
             rows[1] = int(rows[1])
             for idx in range(2, len(rows)):  # Pretty print running times
                 if isinstance(rows[idx], Timedelta):
                     rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
             summary_table.add_row(*rows)
-        summary_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         age_table = self.get_widget_by_id(id=self.NumbersTables.COUNT_BY_AGE.name, expect_type=DataTable)
         adf, age_header = count_by_age(FiveNumberApp.DF)
         for column in age_header:
             age_table.add_column(column, key=column)
         age_table.add_rows(dt_to_sorted_dict(adf).items())
-        age_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         gender_table = self.get_widget_by_id(id=self.NumbersTables.GENDER_BUCKET.name, expect_type=DataTable)
         gdf, gender_header = count_by_gender(FiveNumberApp.DF)
         for column in gender_header:
             gender_table.add_column(column, key=column)
         gender_table.add_rows(dt_to_sorted_dict(gdf).items())
-        gender_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
-
-        wave_table = self.get_widget_by_id(id=self.NumbersTables.WAVE_BUCKET.name, expect_type=DataTable)
-        wdf, wave_header = count_by_wave(FiveNumberApp.DF)
-        for column in wave_header:
-            wave_table.add_column(column, key=column)
-        wave_table.add_rows(dt_to_sorted_dict(wdf).items())
-        wave_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         age_bucket_table = self.get_widget_by_id(id=self.NumbersTables.AGE_BUCKET.name, expect_type=DataTable)
         age_categories, age_cols_head = age_bins(FiveNumberApp.DF)
         for column in age_cols_head:
             age_bucket_table.add_column(column, key=column)
         age_bucket_table.add_rows(dt_to_sorted_dict(age_categories.value_counts()).items())
-        age_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         time_bucket_table = self.get_widget_by_id(id=self.NumbersTables.TIME_BUCKET.name, expect_type=DataTable)
         time_categories, time_cols_head = time_bins(FiveNumberApp.DF)
@@ -136,7 +111,6 @@ class FiveNumberApp(App):
             time_bucket_table.add_column(column, key=column)
         times = dt_to_sorted_dict(time_categories.value_counts()).items()
         time_bucket_table.add_rows(times)
-        time_bucket_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         country_counts_table = self.get_widget_by_id(id=self.NumbersTables.COUNTRY_COUNTS.name, expect_type=DataTable)
         countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
@@ -144,7 +118,6 @@ class FiveNumberApp(App):
         for column in ['Country', 'Count']:
             country_counts_table.add_column(column, key=column)
         country_counts_table.add_rows(rows)
-        country_counts_table.tooltip = f"Median running time: {median_run_time_in_minutes}"
 
         self.notify(
             message=f"All metrics were calculated for {FiveNumberApp.DF.shape[0]} runners.",
@@ -158,101 +131,8 @@ class FiveNumberApp(App):
         Handler when user clicks the table header
         """
         table = event.data_table
-        if table.id != 'Summary':  # Not supported yet
+        if table.id != 'Summary':
             table.sort(event.column_key)
-
-
-class RunnerDetailScreen(ModalScreen):
-    """
-    Modal runner detail screen
-    """
-    ENABLE_COMMAND_PALETTE = False
-    CSS_PATH = "runner_details.tcss"
-
-    def __init__(
-            self,
-            name: str | None = None,
-            ident: str | None = None,
-            classes: str | None = None,
-            row: List[Any] | None = None,
-            df: DataFrame = None,
-            country_df: DataFrame = None
-    ):
-        """
-        Constructor
-        """
-        super().__init__(name, ident, classes)
-        self.row = row
-        self.df = df
-        if not country_df:
-            self.country_df = load_country_details()
-        else:
-            self.country_df = country_df
-
-    def compose(self) -> ComposeResult:
-        """
-        UI element initial layout
-        """
-        bib_idx = FIELD_NAMES_AND_POS[RaceFields.BIB]
-        bibs = [self.row[bib_idx]]
-        columns, details = df_to_list_of_tuples(self.df, bibs)
-        self.log.info(f"Columns: {columns}")
-        self.log.info(f"Details: {details}")
-        row_markdown = ""
-        position_markdown = {}
-        split_markdown = {}
-        for legend in ['full', '20th', '65th']:
-            position_markdown[legend] = ''
-            split_markdown[legend] = ''
-        for i in range(0, len(columns)):
-            column = columns[i]
-            detail = details[0][i]
-            if re.search('pace|time', column):
-                if re.search('20th', column):
-                    split_markdown['20th'] += f"\n* **{column.title()}:** {detail}"
-                elif re.search('65th', column):
-                    split_markdown['65th'] += f"\n* **{column.title()}:** {detail}"
-                else:
-                    split_markdown['full'] += f"\n* **{column.title()}:** {detail}"
-            elif re.search('position', column):
-                if re.search('20th', column):
-                    position_markdown['20th'] += f"\n* **{column.title()}:** {detail}"
-                elif re.search('65th', column):
-                    position_markdown['65th'] += f"\n* **{column.title()}:** {detail}"
-                else:
-                    position_markdown['full'] += f"\n* **{column.title()}:** {detail}"
-            elif re.search('url|bib', column):
-                pass  # Skip uninteresting columns
-            else:
-                row_markdown += f"\n* **{column.title()}:** {detail}"
-        yield MarkdownViewer(f"""# Full Course Race details
-## Runner BIO (BIB: {bibs[0]})
-{row_markdown}
-## Positions
-### 20th floor        
-{position_markdown['20th']}
-### 65th floor        
-{position_markdown['65th']}
-### Full course        
-{position_markdown['full']}                
-## Race time split   
-### 20th floor        
-{split_markdown['20th']}
-### 65th floor        
-{split_markdown['65th']}
-### Full course        
-{split_markdown['full']}         
-        """)
-        btn = Button("Close", variant="primary", id="close")
-        btn.tooltip = "Back to main screen"
-        yield btn
-
-    @on(Button.Pressed, "#close")
-    def on_button_pressed(self, _) -> None:
-        """
-        Handler on button pressed
-        """
-        self.app.pop_screen()
 
 
 class OutlierApp(App):
@@ -278,14 +158,14 @@ class OutlierApp(App):
         """
         yield Header(show_clock=True)
         for column_name in SUMMARY_METRICS:
-            table = DataTable(id=f'{column_name}_outlier')
+            table = DataTable(id=f'col_{column_name.name}_outlier')
             table.cursor_type = 'row'
             table.zebra_stripes = True
             table.tooltip = "Get runner details"
-            if column_name == RaceFields.AGE.value:
-                label = Label(f"{column_name} (older) outliers (Minutes):".title())
+            if column_name == RaceFields.AGE:
+                label = Label(f"{column_name.value} (older) outliers (Minutes):".title())
             else:
-                label = Label(f"{column_name} (slower) outliers (Minutes):".title())
+                label = Label(f"{column_name.value} (slower) outliers (Minutes):".title())
             yield Vertical(
                 label,
                 table
@@ -297,17 +177,18 @@ class OutlierApp(App):
         Initialize UI elements
         """
         for column in SUMMARY_METRICS:
-            table = self.get_widget_by_id(f'{column}_outlier', expect_type=DataTable)
-            columns = [x.title() for x in ['bib', column]]
+            table = self.get_widget_by_id(f'col_{column.name}_outlier', expect_type=DataTable)
+            columns = [x.title() for x in ['bib', column.value]]
             table.add_columns(*columns)
-            outliers = get_outliers(df=OutlierApp.DF, column=column)
-            if column == RaceFields.AGE.value:
+            outliers = get_outliers(df=OutlierApp.DF, column=column.value)
+            self.log.info(f"Outliers {column}: {outliers} ({len(outliers.keys())})")
+            if column == RaceFields.AGE:
                 transformed_outliers = outliers.to_dict().items()
             else:
                 transformed_outliers = []
                 for bib, timedelta in outliers.items():
-                    # print(f"{column} {bib}: {timedelta.total_seconds()/60.0}")
                     transformed_outliers.append((bib, f"{timedelta.total_seconds()/60.0:.2f}"))
+            self.log.info(f"Transformed Outliers {column}: {transformed_outliers}")
             table.add_rows(transformed_outliers)
 
         self.notify(
@@ -327,11 +208,14 @@ class OutlierApp(App):
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
         """
-        Handle row clicked events
+        Push a new detail screen when an outlier is chosen.
+        Reuse the original DataFrame, that has all the runners information, filter by outlier BIB number.
         """
         table = event.data_table
         row = table.get_row(event.row_key)
-        runner_detail = RunnerDetailScreen(df=OutlierApp.DF, row=row)
+        bibs = [row[0]]
+        outlier_runner = df_to_list_of_tuples(df=OutlierApp.DF, bibs=bibs)
+        runner_detail = OutlierDetailScreen(runner_data=outlier_runner)
         self.push_screen(runner_detail)
 
 
@@ -339,11 +223,12 @@ class Plotter:
     """
     Plot different metrics
     """
-    def __init__(self, data_file: Path = None):
+    def __init__(self, year: int, data_file: Path = None):
         """
         Constructor, load data from file using helper.
         """
-        self.df = load_data(data_file)
+        self.df = load_json_data(data_file=data_file, use_pretty=False)
+        self.year = year
 
     def plot_age(self, gtype: str):
         """
@@ -354,7 +239,7 @@ class Plotter:
             series = self.df[RaceFields.AGE.value]
             _, ax = plt.subplots(layout='constrained')
             ax.boxplot(series)
-            ax.set_title("Age details")
+            ax.set_title(f"Age details (Race year: {self.year})")
             ax.set_ylabel('Years')
             ax.set_xlabel('Age')
             ax.grid(True)
@@ -362,14 +247,9 @@ class Plotter:
             series = self.df[RaceFields.AGE.value]
             _, ax = plt.subplots(layout='constrained')
             _, bins, _ = ax.hist(series, density=False, alpha=0.75)
-            # fractions = n / n.max()
-            # norm = colors.Normalize(fractions.min(), fractions.max())
-            # for frac, patch in zip(fractions, patches):
-            #    color = plt.cm.viridis(norm(frac))
-            #    patch.set_facecolor(color)
             ax.set_xlabel('Age [years]')
             ax.set_ylabel('Count')
-            ax.set_title(f'Age details for {series.shape[0]} racers\nBins={len(bins)}')
+            ax.set_title(f'Age details for {series.shape[0]} racers\nBins={len(bins)}\nYear={self.year}\n')
             ax.grid(True)
 
     def plot_country(self):
@@ -388,7 +268,7 @@ class Plotter:
             padding=1,
             color='black'
         )
-        ax.set_title = "Participants per country"
+        ax.set_title = f"Participants per country (Race year: {self.year})"
         ax.set_stacked = True
         ax.set_ylabel('Country')
         ax.set_xlabel('Count per country')
@@ -408,68 +288,21 @@ class Plotter:
             explode=(0.1, 0, 0)
         )
         ax.set_title = "Gender participation"
-        ax.set_xlabel('Gender distribution')
+        ax.set_xlabel(f'Gender (Race year: {self.year})')
         # Legend with the fastest runners by gender
         fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
                           series.keys()]
         ax.legend(wedges, fastest_legend,
-                  title="Fastest by gender",
+                  title=f"Fastest (Race year: {self.year})",
                   loc="center left",
                   bbox_to_anchor=(1, 0, 0.5, 1))
 
 
-class BrowserAppCommand(Provider):
-    """
-    Racer browser details on the Command palette
-    """
-
-    def __init__(self, screen: Screen[Any], match_style: Style | None = None):
-        """
-        Constructor, load data from file using helper.
-        """
-        super().__init__(screen, match_style)
-        self.table = None
-
-    async def startup(self) -> None:
-        """
-        Data loading on the palette startup
-        """
-        browser_app = self.app
-        self.table = browser_app.query(DataTable).first()
-
-    async def search(self, query: str) -> Hit:
-        """
-        Return hits based on a user query
-        """
-        matcher = self.matcher(query)
-        browser_app = self.screen.app
-        assert isinstance(browser_app, BrowserApp)
-        df = browser_app.df
-        for row_key in self.table.rows:
-            row = self.table.get_row(row_key)
-            for name in [RaceFields.BIB, RaceFields.NAME, RaceFields.OVERALL_POSITION, RaceFields.COUNTRY]:
-                idx = FIELD_NAMES_AND_POS[name]
-                name_idx = FIELD_NAMES_AND_POS[RaceFields.NAME]
-                searchable = str(row[idx])
-                score = matcher.match(searchable)
-                if score > 0:
-                    if name == RaceFields.NAME:
-                        details = f"{searchable} - {name.value}"
-                    else:
-                        details = f"{searchable} - {name.value} ({row[name_idx]})"
-                    runner_detail = RunnerDetailScreen(df=df, row=row)
-                    yield Hit(
-                        score=score,
-                        match_display=matcher.highlight(f"{searchable}"),
-                        command=partial(browser_app.push_screen, runner_detail),
-                        help=f"{details}"
-                    )
-
-
 class BrowserApp(App):
     """
-    User browser detail application
+    Racer detail browser  application
+    Shows racers for a given year on a table.
     """
     BINDINGS = [("q", "quit_app", "Quit")]
     CSS_PATH = "browser.tcss"
@@ -488,30 +321,8 @@ class BrowserApp(App):
         Constructor
         """
         super().__init__(driver_class, css_path, watch_css)
-
-        if not country_data:
-            self.country_data = load_country_details()
-        else:
-            self.country_data = country_data
-
-        if df is None or df.empty:
-            self.df = load_data()
-        else:
-            self.df = df
-
-        for three_letter_code in set(self.df[RaceFields.COUNTRY.value].tolist()):
-            filtered_country = lookup_country_by_code(
-                df=self.country_data,
-                three_letter_code=three_letter_code
-            )
-            country_name: str = three_letter_code
-            if CountryColumns.NAME.value in filtered_country.columns:
-                country_name = filtered_country[CountryColumns.NAME.value].values[0]
-            filtered = self.df[RaceFields.COUNTRY.value] == three_letter_code
-            self.df.loc[
-                filtered,
-                [RaceFields.COUNTRY.value]
-            ] = [country_name.strip().title()]
+        self.country_data = load_country_details() if not country_data else country_data
+        self.df = load_json_data() if (df is None or df.empty) else df
 
     def action_quit_app(self):
         """
@@ -534,13 +345,13 @@ class BrowserApp(App):
         table = self.get_widget_by_id('runners', expect_type=DataTable)
         table.zebra_stripes = True
         table.cursor_type = 'row'
-        columns_raw, rows = df_to_list_of_tuples(self.df)
+        columns_raw, rows = df_to_list_of_tuples(df=self.df)
         for column in columns_raw:
             table.add_column(column.title(), key=column)
         for number, row in enumerate(rows[0:], start=1):
             label = Text(str(number), style="#B0FC38 italic")
             table.add_row(*row, label=label)
-        table.sort('overall position')
+        table.sort(RaceFields.TIME.value)
 
         self.notify(
             message=f"Loaded all data for {self.df.shape[0]} runners.",
@@ -563,5 +374,5 @@ class BrowserApp(App):
         """
         table = event.data_table
         row = table.get_row(event.row_key)
-        runner_detail = RunnerDetailScreen(df=self.df, row=row)
-        self.push_screen(runner_detail)
+        runner_detail_screen = RunnerDetailScreen(table=table, row=row)
+        self.push_screen(runner_detail_screen)

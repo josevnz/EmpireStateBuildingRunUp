@@ -1,4 +1,4 @@
-# EmpireStateRunUp changelog
+# EmpireStateBuildingRunUp Changelog
 
 Most important changes on this project, by version.
 
@@ -11,6 +11,9 @@ Most important changes on this project, by version.
   - Results scrapped with [athlinks-races](https://pypi.org/project/athlinks-races/)
     - [2023](https://www.athlinks.com/event/382111/results/Event/1062909/Results)
     - [2024](https://www.athlinks.com/event/382111/results/Event/1093108/Results)
+- Improved search palette
+- Speed and memory optimizations
+- Second time running this race, 2024 results!
 
 ## Jan Sun 12 2025 <kodegeek.com@protonmail.com> - 0.1.1
 - Removed creation of 3 deprecated applications: _esru_scraper, esru_csv_cleaner, esru_raw_cleaner_
@@ -25,3 +28,4 @@ Most important changes on this project, by version.
 
 ## Dec Fri 01 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> < 0.5
 - Initial tutorial version
+- First time ever running a Tower race, 2023 results!

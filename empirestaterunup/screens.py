@@ -7,7 +7,7 @@ from textual.app import ComposeResult
 from textual.screen import ModalScreen
 from textual.widgets import MarkdownViewer, Button, DataTable
 
-from empirestaterunup.data import FIELD_NAMES_AND_POS, RaceFields
+from empirestaterunup.data import FIELD_NAMES_AND_POS, RaceFields, convert_timedelta
 
 
 class RunnerDetailScreen(ModalScreen):
@@ -49,7 +49,12 @@ class RunnerDetailScreen(ModalScreen):
                 self.log.info(f"Row: {self.row}")
                 self.log.info(f"Col Map: {col_map}")
             for idx, col_name in col_map.items():
-                row_markdown += f"* **{col_name}**: {self.row[idx]}\n"
+                value = self.row[idx]
+                if col_name in [RaceFields.TIME.value.title(), RaceFields.SIXTY_FIVE_FLOOR_TIME.value.title(), RaceFields.TWENTY_FLOOR_TIME.value.title()]:
+                    hours, minutes, seconds = convert_timedelta(value)
+                    row_markdown += f"* **{col_name.title()}**: {minutes}:{seconds}\n"
+                else:
+                    row_markdown += f"* **{col_name}**: {value}\n"
 
         yield MarkdownViewer(f"""# Full Course Race details
 ## Runner BIO (BIB: {bib})
@@ -101,7 +106,11 @@ York', 'Massapequa', Timedelta('0 days 01:05:19'), Timedelta('0 days 00:07:52'),
             if self.debug:
                 self.log.info(f"Runners data: {self.runner_data}")
             for col_name, value in zip(self.runner_data[0], self.runner_data[1][0]):
-                row_markdown += f"* **{col_name.title()}**: {value}\n"
+                if col_name in [RaceFields.TIME.value, RaceFields.SIXTY_FIVE_FLOOR_TIME.value, RaceFields.TWENTY_FLOOR_TIME.value]:
+                    hours, minutes, seconds = convert_timedelta(value)
+                    row_markdown += f"* **{col_name.title()}**: {minutes}:{seconds}\n"
+                else:
+                    row_markdown += f"* **{col_name.title()}**: {value}\n"
 
         yield MarkdownViewer(f"""# Full Course Race details
 ## Runner BIO (BIB: {bib})

@@ -11,7 +11,7 @@ from typing import Any, Dict, Tuple, Union, List
 
 import pandas
 import tomlkit
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, Timedelta
 from tomlkit import TOMLDocument
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
@@ -290,3 +290,11 @@ def beautify_race_times(time: datetime.timedelta) -> str:
     mm, ss = divmod(time.total_seconds(), 60)
     hh, mm = divmod(mm, 60)  # Ignore days part as the race doesn't last more than 24 hours
     return f"{int(hh)}:{int(mm)}:{int(ss)}"
+
+
+def convert_timedelta(duration: Timedelta):
+    days, seconds = duration.days, duration.seconds
+    hours = days * 24 + seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = (seconds % 60)
+    return hours, minutes, seconds

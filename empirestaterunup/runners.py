@@ -32,13 +32,13 @@ def run_5_number():
         help="Race results."
     )
     options = parser.parse_args()
-    app = FiveNumberApp()
     if options.results:
         FiveNumberApp.DF = load_json_data(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
     else:
         FiveNumberApp.DF = load_json_data()
+    app = FiveNumberApp()
     app.title = "Five Number Summary".title()
-    app.sub_title = f"Runners: {FiveNumberApp.DF.shape[0]}"
+    app.sub_title = f"Runners: {FiveNumberApp.DF.shape[0]} (Year: {options.results})"
     app.run()
 
 
@@ -63,7 +63,7 @@ def run_outlier():
         OutlierApp.DF = load_json_data()
     app = OutlierApp()
     app.title = "Outliers Summary".title()
-    app.sub_title = f"Runners: {OutlierApp.DF.shape[0]}"
+    app.sub_title = f"Runners: {OutlierApp.DF.shape[0]} (Year: {options.results})"
     app.run()
 
 
@@ -98,9 +98,9 @@ def simple_plot():
     options = parser.parse_args()
     plt.style.use('fivethirtyeight')  # Common style for all the plots
     if options.results:
-        pzs = Plotter(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results])
+        pzs = Plotter(data_file=RACE_RESULTS_JSON_FULL_LEVEL[options.results], year=options.results)
     else:
-        pzs = Plotter()
+        pzs = Plotter(year=options.results)
     if options.report == 'age':
         pzs.plot_age(options.type)
     elif options.report == 'country':
@@ -138,5 +138,5 @@ def run_browser():
         country_df = load_country_details(options.country)
     app = BrowserApp(df=df, country_data=country_df)
     app.title = "Race runners".title()
-    app.sub_title = f"Browse details: {app.df.shape[0]}"
+    app.sub_title = f"Browse details: {app.df.shape[0]} (Year: {options.results})"
     app.run()

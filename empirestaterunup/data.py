@@ -51,13 +51,8 @@ class RaceFields(Enum):
     SIXTY_FIVE_FLOOR_TIME = '65th floor'
 
 
-CVS_FIELD_NAMES = [x.value for x in RaceFields]
-CSV_FIELD_NAMES_FOR_SCRAPING = [x.value for x in RaceFields]
-CSV_FIELD_NAMES_AND_POS: Dict[RaceFields, int] = {}
-POS = 0
-for field in RaceFields:
-    CSV_FIELD_NAMES_AND_POS[field] = POS
-    POS += 1
+FIELD_NAMES = [x.value for x in RaceFields]
+FIELD_NAMES_AND_POS: Dict[RaceFields, int] = {field: idx for idx, field in zip(range(0, len(RaceFields)), RaceFields)}
 
 RACE_RESULTS_JSON_FULL_LEVEL = {
     2023: Path(__file__).parent.joinpath("results-2023.json"),
@@ -167,7 +162,7 @@ def df_to_list_of_tuples(
         bibs: list[int] = None
 ) -> Union[Tuple | list[Tuple]]:
     """
-    Take a DataFrame and return a more friendly structure to be used by a DataTable
+    Take a DataFrame and return a more friendly structure to be used by a DataTable, for example.
     :param df DataFrame to convert
     :param bibs List of racing BIB to filter
     :return list of Tuple of rows, Tuple with columns
@@ -177,16 +172,15 @@ def df_to_list_of_tuples(
         filtered = bib_as_column
     else:
         filtered = bib_as_column[bib_as_column[RaceFields.BIB.value].isin(bibs)]
-    column_names = CVS_FIELD_NAMES
     rows = []
     for _, r in filtered.iterrows():
         ind_row: List[Any] = []
-        for col in column_names:
+        for col in FIELD_NAMES:
             ind_row.append(r[col])
         tpl = tuple(ind_row)
         rows.append(tpl)
 
-    return tuple(column_names), rows
+    return tuple(FIELD_NAMES), rows
 
 
 def series_to_list_of_tuples(series: Series) -> list[Tuple]:

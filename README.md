@@ -31,6 +31,15 @@ There are 4 scripts that you can run:
 * esru_browser
 * esru_plot
 
+If you have uvx, you can run any of them like this:
+
+```shell
+uvx --from EmpireStateRunUp esru_numbers
+uvx --from EmpireStateRunUp esru_outlier
+uvx --from EmpireStateRunUp esru_browser
+uvx --from EmpireStateRunUp esru_plot
+```
+
 If you want to learn more about these programs, please grab a cup of coffe and read the [TUTORIAL](TUTORIAL.md)
 
 ## If you are a developer

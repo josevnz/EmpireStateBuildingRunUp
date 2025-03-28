@@ -14,7 +14,7 @@ lint = [
 ]
 dev = [
     "textual-dev==1.7.0",
-    "twine==5.1.1",
+    "twine==6.1.0",
 ]
 
 [project]

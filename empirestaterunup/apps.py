@@ -46,6 +46,7 @@ class FiveNumberApp(App):
         COUNTRY_COUNTS = 'Country Counts'
 
     ENABLE_COMMAND_PALETTE = False
+    current_sorts: set = set()
 
     def action_quit_app(self):
         """
@@ -125,14 +126,28 @@ class FiveNumberApp(App):
             severity="information"
         )
 
+    def sort_reverse(self, sort_type: str):
+        """
+        Toggle sort type. To be passed to sort method
+        """
+        reverse = sort_type in self.current_sorts
+        if reverse:
+            self.current_sorts.remove(sort_type)
+        else:
+            self.current_sorts.add(sort_type)
+        return reverse
+
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         """
         Handler when user clicks the table header
         """
         table = event.data_table
-        if table.id != 'Summary':
-            table.sort(event.column_key)
+        if table.id != 'SUMMARY':
+            table.sort(
+                event.column_key,
+                reverse=self.sort_reverse(event.column_key.value)
+            )
 
 
 class OutlierApp(App):
@@ -145,6 +160,7 @@ class OutlierApp(App):
     ]
     CSS_PATH = "outliers.tcss"
     ENABLE_COMMAND_PALETTE = False
+    current_sorts: set = set()
 
     def action_quit_app(self):
         """
@@ -197,13 +213,27 @@ class OutlierApp(App):
             severity="information"
         )
 
+    def sort_reverse(self, sort_type: str):
+        """
+        Toggle sort type. To be passed to sort method
+        """
+        reverse = sort_type in self.current_sorts
+        if reverse:
+            self.current_sorts.remove(sort_type)
+        else:
+            self.current_sorts.add(sort_type)
+        return reverse
+
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         """
         Handle table click events
         """
         table = event.data_table
-        table.sort(event.column_key)
+        table.sort(
+            event.column_key,
+            reverse=self.sort_reverse(event.column_key.value)
+        )
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
@@ -308,6 +338,7 @@ class BrowserApp(App):
     CSS_PATH = "browser.tcss"
     ENABLE_COMMAND_PALETTE = True
     COMMANDS = App.COMMANDS | {BrowserAppCommand}
+    current_sorts: set = set()
 
     def __init__(
             self,
@@ -359,13 +390,27 @@ class BrowserApp(App):
             severity="information"
         )
 
+    def sort_reverse(self, sort_type: str):
+        """
+        Toggle sort type. To be passed to sort method
+        """
+        reverse = sort_type in self.current_sorts
+        if reverse:
+            self.current_sorts.remove(sort_type)
+        else:
+            self.current_sorts.add(sort_type)
+        return reverse
+
     @on(DataTable.HeaderSelected, '#runners')
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         """
-        Callback when user clicks the table column
+        Callback when user clicks the table column header
         """
         table = event.data_table
-        table.sort(event.column_key)
+        table.sort(
+            event.column_key,
+            reverse=self.sort_reverse(event.column_key.value)
+        )
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:

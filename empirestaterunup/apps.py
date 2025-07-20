@@ -160,7 +160,7 @@ class FiveNumberApp(App):
         if table.id != 'SUMMARY':
             table.sort(
                 event.column_key,
-                reverse=self.sort_reverse(event.column_key.value)
+                reverse=self.sort_reverse(str(event.column_key.value))
             )
 
 
@@ -246,7 +246,7 @@ class OutlierApp(App):
         table = event.data_table
         table.sort(
             event.column_key,
-            reverse=self.sort_reverse(event.column_key.value)
+            reverse=self.sort_reverse(str(event.column_key.value))
         )
 
     @on(DataTable.RowSelected)
@@ -423,7 +423,7 @@ class BrowserApp(App):
         table = event.data_table
         table.sort(
             event.column_key,
-            reverse=self.sort_reverse(event.column_key.value)
+            reverse=self.sort_reverse(str(event.column_key.value))
         )
 
     @on(DataTable.RowSelected)

@@ -2,7 +2,7 @@
 ---
 name: Empire State Run Up code linting
 permissions:
-  contents: read
+  contents: "read"
 'on':
   - push
 jobs:
@@ -31,5 +31,5 @@ jobs:
           ruff check empirestaterunup
           ruff check test
       - name: Analysing the Empire State Run Up code with Yamllint
-        run: |          
+        run: |
           yamllint .github/workflows/*.yml

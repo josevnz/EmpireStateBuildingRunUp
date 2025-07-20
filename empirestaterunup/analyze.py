@@ -3,12 +3,13 @@ Analyze original race results and give back canned reports
 author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
 import re
-from enum import Enum
-from typing import Union, Tuple, Dict, Any
 from datetime import timedelta
+from enum import Enum
+from typing import Any
+
 import numpy as np
 import pandas
-from pandas import DataFrame, Categorical, Series
+from pandas import Categorical, DataFrame, Series
 
 from empirestaterunup.data import RaceFields
 
@@ -45,7 +46,7 @@ def count_by_gender(data: DataFrame) -> tuple[DataFrame, tuple]:
     return data.groupby(RaceFields.GENDER.value)[RaceFields.GENDER.value].count(), ('Gender', 'Count')
 
 
-def dt_to_sorted_dict(df: Union[DataFrame | Series]) -> dict:
+def dt_to_sorted_dict(df: DataFrame | Series) -> dict:
     """
     Convert to sorted dict
     """
@@ -90,7 +91,7 @@ def time_bins(df: DataFrame) -> tuple[Categorical, tuple]:
     return categories, ('Time', 'Count')
 
 
-def get_country_counts(df: DataFrame, min_participants: int = 5, max_participants: int = 5) -> Tuple[Series, Series, Series]:
+def get_country_counts(df: DataFrame, min_participants: int = 5, max_participants: int = 5) -> tuple[Series, Series, Series]:
     """
     Gen interesting country counts
     :param df DataFrame to query
@@ -105,7 +106,7 @@ def get_country_counts(df: DataFrame, min_participants: int = 5, max_participant
     return countries_counts, min_country_filter, max_country_filter
 
 
-def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Dict[str, Any]]:
+def find_fastest(df: DataFrame, criteria: FastestFilters) -> dict[str, dict[str, Any]]:
     """
     Find the fastest runners, per category
     :param df Dataframe to analyze

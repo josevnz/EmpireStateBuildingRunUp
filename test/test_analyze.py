@@ -2,20 +2,28 @@
 Multiple tests for data analysis
 """
 import unittest
-from typing import List
 
 from pandas import DataFrame
 
-from empirestaterunup.analyze import get_5_number, SUMMARY_METRICS, count_by_age, count_by_gender, \
-    get_zscore, get_outliers, age_bins, time_bins, get_country_counts
-from empirestaterunup.data import load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
+from empirestaterunup.analyze import (
+    SUMMARY_METRICS,
+    age_bins,
+    count_by_age,
+    count_by_gender,
+    get_5_number,
+    get_country_counts,
+    get_outliers,
+    get_zscore,
+    time_bins,
+)
+from empirestaterunup.data import RACE_RESULTS_JSON_FULL_LEVEL, load_json_data
 
 
 class AnalyzeTestCase(unittest.TestCase):
     """
     Unit tests for analyze functions
     """
-    df_list: List[DataFrame] = []
+    df_list: list[DataFrame] = []
 
     @classmethod
     def setUpClass(cls) -> None:

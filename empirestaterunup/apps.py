@@ -4,25 +4,39 @@ author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
 from enum import Enum
 from pathlib import Path
-from typing import Type
 
+import matplotlib.pyplot as plt
 from pandas import DataFrame, Timedelta
 from rich.text import Text
 from textual import on
-from textual.app import ComposeResult, App, CSSPathType
+from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Vertical
 from textual.driver import Driver
 from textual.widgets import DataTable, Footer, Header, Label
-import matplotlib.pyplot as plt
 
-from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, \
-    dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, FastestFilters, \
-    find_fastest
-from empirestaterunup.data import df_to_list_of_tuples, load_country_details, \
-    RaceFields, series_to_list_of_tuples, beautify_race_times, \
-    load_json_data
+from empirestaterunup.analyze import (
+    SUMMARY_METRICS,
+    FastestFilters,
+    age_bins,
+    count_by_age,
+    count_by_gender,
+    dt_to_sorted_dict,
+    find_fastest,
+    get_5_number,
+    get_country_counts,
+    get_outliers,
+    time_bins,
+)
+from empirestaterunup.data import (
+    RaceFields,
+    beautify_race_times,
+    df_to_list_of_tuples,
+    load_country_details,
+    load_json_data,
+    series_to_list_of_tuples,
+)
 from empirestaterunup.providers import BrowserAppCommand
-from empirestaterunup.screens import RunnerDetailScreen, OutlierDetailScreen
+from empirestaterunup.screens import OutlierDetailScreen, RunnerDetailScreen
 
 
 class FiveNumberApp(App):
@@ -322,7 +336,7 @@ class Plotter:
         # Legend with the fastest runners by gender
         fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
-                          series.keys()]
+                          series]
         ax.legend(wedges, fastest_legend,
                   title=f"Fastest (Race year: {self.year})",
                   loc="center left",
@@ -342,7 +356,7 @@ class BrowserApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
             country_data: DataFrame = None,
@@ -352,7 +366,7 @@ class BrowserApp(App):
         Constructor
         """
         super().__init__(driver_class, css_path, watch_css)
-        self.country_data = load_country_details() if not country_data else country_data
+        self.country_data = country_data if country_data else load_country_details()
         self.df = load_json_data() if (df is None or df.empty) else df
 
     def action_quit_app(self):

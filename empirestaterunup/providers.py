@@ -5,12 +5,12 @@ from functools import partial
 from typing import Any
 
 from rich.style import Style
-from textual.command import Provider, DiscoveryHit, Hit
+from textual.command import DiscoveryHit, Hit, Provider
 from textual.screen import Screen
 from textual.widgets import DataTable
 
+from empirestaterunup.data import FIELD_NAMES_AND_POS, RaceFields
 from empirestaterunup.screens import RunnerDetailScreen
-from empirestaterunup.data import RaceFields, FIELD_NAMES_AND_POS
 
 PALETTE_FIELDS = [RaceFields.BIB, RaceFields.NAME, RaceFields.COUNTRY]
 

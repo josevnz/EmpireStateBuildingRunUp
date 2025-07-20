@@ -4,14 +4,19 @@ I wrote this script to normalize the data results from the 'Empire State Buildin
 
 Author Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
-from pathlib import Path
-from argparse import ArgumentParser
 import logging
+from argparse import ArgumentParser
+from pathlib import Path
 
 from matplotlib import pyplot as plt
 
-from empirestaterunup.apps import FiveNumberApp, OutlierApp, Plotter, BrowserApp
-from empirestaterunup.data import load_country_details, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL, DEFAULT_YEAR
+from empirestaterunup.apps import BrowserApp, FiveNumberApp, OutlierApp, Plotter
+from empirestaterunup.data import (
+    DEFAULT_YEAR,
+    RACE_RESULTS_JSON_FULL_LEVEL,
+    load_country_details,
+    load_json_data,
+)
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 RESULTS = list(RACE_RESULTS_JSON_FULL_LEVEL.keys())

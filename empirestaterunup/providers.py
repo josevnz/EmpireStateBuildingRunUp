@@ -1,6 +1,7 @@
 """
 Module to handle all the providers' logic.
 """
+from collections.abc import AsyncGenerator
 from functools import partial
 from typing import Any
 
@@ -43,7 +44,7 @@ class BrowserAppCommand(Provider):
             self.log.info(f"Table on provider: {self.table}")
             self.log.info(f"Rows:{len(self.table.rows)}")
 
-    async def discover(self) -> DiscoveryHit:
+    async def discover(self) -> AsyncGenerator[DiscoveryHit, Any]:
         """
         Pre-populate the palette with results, to give an idea how the search works
         """
@@ -66,7 +67,7 @@ class BrowserAppCommand(Provider):
                 )
             break
 
-    async def search(self, query: str) -> Hit:
+    async def search(self, query: str) -> AsyncGenerator[Hit, Any]:
         """
         Return hits based on a user query
         """

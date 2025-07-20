@@ -1,9 +1,8 @@
 # GitHub action to publish tags to Pypi
 ---
 name: Publish EmpireStateRunUp 🐍 distribution 📦 to PyPI and TestPyPI
-
-on: "push"
-
+"on":
+  - 'push'
 jobs:
   build:
     name: Build distribution 📦

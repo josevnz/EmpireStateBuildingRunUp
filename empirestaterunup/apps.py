@@ -13,6 +13,7 @@ from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Vertical
 from textual.driver import Driver
 from textual.widgets import DataTable, Footer, Header, Label
+from textual.worker import get_current_worker
 
 from empirestaterunup.analyze import (
     SUMMARY_METRICS,
@@ -88,96 +89,107 @@ class FiveNumberApp(App):
     def update_summary(self, summary_table: DataTable) -> None:
         columns = [x.title() for x in FiveNumberApp.FIVE_NUMBER_FIELDS]
         columns.insert(0, 'Summary (Minutes)')
-        self.call_from_thread(
-            summary_table.add_columns,
-            *columns
-        )
-        for metric in SUMMARY_METRICS:
-            ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
-            rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
-            rows.insert(0, metric.value.title())
-            rows[1] = int(rows[1])
-            for idx in range(2, len(rows)):  # Pretty print running times
-                if isinstance(rows[idx], Timedelta):
-                    rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
+        worker = get_current_worker()
+        if not worker.is_cancelled:
             self.call_from_thread(
-                summary_table.add_row,
-                *rows
+                summary_table.add_columns,
+                *columns
             )
+            for metric in SUMMARY_METRICS:
+                ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
+                rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
+                rows.insert(0, metric.value.title())
+                rows[1] = int(rows[1])
+                for idx in range(2, len(rows)):  # Pretty print running times
+                    if isinstance(rows[idx], Timedelta):
+                        rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
+                self.call_from_thread(
+                    summary_table.add_row,
+                    *rows
+                )
 
     @work(exclusive=False, thread=True)
     def update_age_table(self, age_table: DataTable) -> None:
         adf, age_header = count_by_age(FiveNumberApp.DF)
-        for column in age_header:
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in age_header:
+                self.call_from_thread(
+                    age_table.add_column,
+                    column,
+                    key=column
+                )
             self.call_from_thread(
-                age_table.add_column,
-                column,
-                key=column
+                age_table.add_rows,
+                dt_to_sorted_dict(adf).items()
             )
-        self.call_from_thread(
-            age_table.add_rows,
-            dt_to_sorted_dict(adf).items()
-
-        )
 
     @work(exclusive=False, thread=True)
     def update_gender_table(self, gender_table: DataTable) -> None:
         gdf, gender_header = count_by_gender(FiveNumberApp.DF)
-        for column in gender_header:
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in gender_header:
+                self.call_from_thread(
+                    gender_table.add_column,
+                    column,
+                    key=column
+                )
+            gender_rows = dt_to_sorted_dict(gdf).items()
             self.call_from_thread(
-                gender_table.add_column,
-                column,
-                key=column
+                gender_table.add_rows,
+                gender_rows
             )
-        gender_rows = dt_to_sorted_dict(gdf).items()
-        self.call_from_thread(
-            gender_table.add_rows,
-            gender_rows
-        )
 
     @work(exclusive=False, thread=True)
     def update_age_bucket_table(self, age_bucket_table: DataTable) -> None:
         age_categories, age_cols_head = age_bins(FiveNumberApp.DF)
-        for column in age_cols_head:
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in age_cols_head:
+                self.call_from_thread(
+                    age_bucket_table.add_column,
+                    column,
+                    key=column
+                )
             self.call_from_thread(
-                age_bucket_table.add_column,
-                column,
-                key=column
+                age_bucket_table.add_rows,
+                dt_to_sorted_dict(age_categories.value_counts()).items()
             )
-        self.call_from_thread(
-            age_bucket_table.add_rows,
-            dt_to_sorted_dict(age_categories.value_counts()).items()
-        )
 
     @work(exclusive=False, thread=True)
     def update_time_bucket_table(self, time_bucket_table: DataTable) -> None:
         time_categories, time_cols_head = time_bins(FiveNumberApp.DF)
-        for column in time_cols_head:
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in time_cols_head:
+                self.call_from_thread(
+                    time_bucket_table.add_column,
+                    column,
+                    key=column
+                )
+            times = dt_to_sorted_dict(time_categories.value_counts()).items()
             self.call_from_thread(
-                time_bucket_table.add_column,
-                column,
-                key=column
+                time_bucket_table.add_rows,
+                times
             )
-        times = dt_to_sorted_dict(time_categories.value_counts()).items()
-        self.call_from_thread(
-            time_bucket_table.add_rows,
-            times
-        )
 
     @work(exclusive=False, thread=True)
     def update_country_counts_table(self, country_counts_table: DataTable) -> None:
         countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
         rows = series_to_list_of_tuples(countries_counts)
-        for column in ['Country', 'Count']:
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in ['Country', 'Count']:
+                self.call_from_thread(
+                    country_counts_table.add_column,
+                    column,
+                    key=column
+                )
             self.call_from_thread(
-                country_counts_table.add_column,
-                column,
-                key=column
+                country_counts_table.add_rows,
+                rows
             )
-        self.call_from_thread(
-            country_counts_table.add_rows,
-            rows
-        )
 
     async def on_mount(self) -> None:
         """
@@ -280,10 +292,12 @@ class OutlierApp(App):
     @work(exclusive=False, thread=True)
     def update_tables(self, table: DataTable, column: RaceFields) -> None:
         columns = [x.title() for x in ['bib', column.value]]
-        self.call_from_thread(
-            table.add_columns,
-            *columns,
-        )
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                table.add_columns,
+                *columns,
+            )
         outliers = get_outliers(df=OutlierApp.DF, column=column.value)
         self.log.info(f"Outliers {column}: {outliers} ({len(outliers.keys())})")
         if column == RaceFields.AGE:
@@ -293,10 +307,11 @@ class OutlierApp(App):
             for bib, timedelta in outliers.items():
                 transformed_outliers.append((bib, f"{timedelta.total_seconds() / 60.0:.2f}"))
         self.log.info(f"Transformed Outliers {column}: {transformed_outliers}")
-        self.call_from_thread(
-            table.add_rows,
-            transformed_outliers
-        )
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                table.add_rows,
+                transformed_outliers
+            )
 
     def on_mount(self) -> None:
         """
@@ -474,12 +489,14 @@ class BrowserApp(App):
     @work(exclusive=True, thread=True)
     def update_table(self, table: DataTable) -> None:
         columns_raw, rows = df_to_list_of_tuples(df=self.df)
-        for column in columns_raw:
-            self.call_from_thread(
-                table.add_column,
-                column.title(),
-                key=column
-            )
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in columns_raw:
+                self.call_from_thread(
+                    table.add_column,
+                    column.title(),
+                    key=column
+                )
         for number, row in enumerate(rows[0:], start=1):
             label = Text(str(number), style="#B0FC38 italic")
             self.call_from_thread(
@@ -487,10 +504,11 @@ class BrowserApp(App):
                 *row,
                 label=label
             )
-        self.call_from_thread(
-            table.sort,
-            RaceFields.TIME.value
-        )
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                table.sort,
+                RaceFields.TIME.value
+            )
 
     def on_mount(self) -> None:
         """

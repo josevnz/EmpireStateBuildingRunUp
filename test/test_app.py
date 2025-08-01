@@ -2,9 +2,11 @@
 Unit tests for application
 """
 import unittest
+
 from textual.widgets import DataTable, MarkdownViewer
+
 from empirestaterunup.apps import BrowserApp
-from empirestaterunup.data import load_json_data, RACE_RESULTS_JSON_FULL_LEVEL
+from empirestaterunup.data import RACE_RESULTS_JSON_FULL_LEVEL, load_json_data
 
 
 class AppTestCase(unittest.IsolatedAsyncioTestCase):
@@ -20,7 +22,7 @@ class AppTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
             await pilot.press("ctrl+\\")
-            for char in "jose".split():
+            for char in ["jose"]:
                 await pilot.press(char)
             await pilot.press("enter")
             markdown_viewer = app.screen.query(MarkdownViewer).first()

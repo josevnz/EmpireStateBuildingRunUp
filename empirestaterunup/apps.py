@@ -4,25 +4,40 @@ author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
 from enum import Enum
 from pathlib import Path
-from typing import Type
 
+import matplotlib.pyplot as plt
 from pandas import DataFrame, Timedelta
 from rich.text import Text
-from textual import on
-from textual.app import ComposeResult, App, CSSPathType
+from textual import on, work
+from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Vertical
 from textual.driver import Driver
 from textual.widgets import DataTable, Footer, Header, Label
-import matplotlib.pyplot as plt
+from textual.worker import get_current_worker
 
-from empirestaterunup.analyze import SUMMARY_METRICS, get_5_number, count_by_age, count_by_gender, \
-    dt_to_sorted_dict, get_outliers, age_bins, time_bins, get_country_counts, FastestFilters, \
-    find_fastest
-from empirestaterunup.data import df_to_list_of_tuples, load_country_details, \
-    RaceFields, series_to_list_of_tuples, beautify_race_times, \
-    load_json_data
+from empirestaterunup.analyze import (
+    SUMMARY_METRICS,
+    FastestFilters,
+    age_bins,
+    count_by_age,
+    count_by_gender,
+    dt_to_sorted_dict,
+    find_fastest,
+    get_5_number,
+    get_country_counts,
+    get_outliers,
+    time_bins,
+)
+from empirestaterunup.data import (
+    RaceFields,
+    beautify_race_times,
+    df_to_list_of_tuples,
+    load_country_details,
+    load_json_data,
+    series_to_list_of_tuples,
+)
 from empirestaterunup.providers import BrowserAppCommand
-from empirestaterunup.screens import RunnerDetailScreen, OutlierDetailScreen
+from empirestaterunup.screens import OutlierDetailScreen, RunnerDetailScreen
 
 
 class FiveNumberApp(App):
@@ -63,62 +78,147 @@ class FiveNumberApp(App):
             table = DataTable(id=table_id.name)
             table.cursor_type = 'row'
             table.zebra_stripes = True
+            table.loading = True
             yield Vertical(
                 Label(str(table_id.value)),
                 table
             )
         yield Footer()
 
-    def on_mount(self) -> None:
+    @work(exclusive=False, thread=True)
+    def update_summary(self, summary_table: DataTable) -> None:
+        columns = [x.title() for x in FiveNumberApp.FIVE_NUMBER_FIELDS]
+        columns.insert(0, 'Summary (Minutes)')
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                summary_table.add_columns,
+                *columns
+            )
+            for metric in SUMMARY_METRICS:
+                ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
+                rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
+                rows.insert(0, metric.value.title())
+                rows[1] = int(rows[1])
+                for idx in range(2, len(rows)):  # Pretty print running times
+                    if isinstance(rows[idx], Timedelta):
+                        rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
+                self.call_from_thread(
+                    summary_table.add_row,
+                    *rows
+                )
+
+    @work(exclusive=False, thread=True)
+    def update_age_table(self, age_table: DataTable) -> None:
+        adf, age_header = count_by_age(FiveNumberApp.DF)
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in age_header:
+                self.call_from_thread(
+                    age_table.add_column,
+                    column,
+                    key=column
+                )
+            self.call_from_thread(
+                age_table.add_rows,
+                dt_to_sorted_dict(adf).items()
+            )
+
+    @work(exclusive=False, thread=True)
+    def update_gender_table(self, gender_table: DataTable) -> None:
+        gdf, gender_header = count_by_gender(FiveNumberApp.DF)
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in gender_header:
+                self.call_from_thread(
+                    gender_table.add_column,
+                    column,
+                    key=column
+                )
+            gender_rows = dt_to_sorted_dict(gdf).items()
+            self.call_from_thread(
+                gender_table.add_rows,
+                gender_rows
+            )
+
+    @work(exclusive=False, thread=True)
+    def update_age_bucket_table(self, age_bucket_table: DataTable) -> None:
+        age_categories, age_cols_head = age_bins(FiveNumberApp.DF)
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in age_cols_head:
+                self.call_from_thread(
+                    age_bucket_table.add_column,
+                    column,
+                    key=column
+                )
+            self.call_from_thread(
+                age_bucket_table.add_rows,
+                dt_to_sorted_dict(age_categories.value_counts()).items()
+            )
+
+    @work(exclusive=False, thread=True)
+    def update_time_bucket_table(self, time_bucket_table: DataTable) -> None:
+        time_categories, time_cols_head = time_bins(FiveNumberApp.DF)
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in time_cols_head:
+                self.call_from_thread(
+                    time_bucket_table.add_column,
+                    column,
+                    key=column
+                )
+            times = dt_to_sorted_dict(time_categories.value_counts()).items()
+            self.call_from_thread(
+                time_bucket_table.add_rows,
+                times
+            )
+
+    @work(exclusive=False, thread=True)
+    def update_country_counts_table(self, country_counts_table: DataTable) -> None:
+        countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
+        rows = series_to_list_of_tuples(countries_counts)
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in ['Country', 'Count']:
+                self.call_from_thread(
+                    country_counts_table.add_column,
+                    column,
+                    key=column
+                )
+            self.call_from_thread(
+                country_counts_table.add_rows,
+                rows
+            )
+
+    async def on_mount(self) -> None:
         """
         Initialize component contents
         """
 
         summary_table = self.get_widget_by_id(id=self.NumbersTables.SUMMARY.name, expect_type=DataTable)
-        columns = [x.title() for x in FiveNumberApp.FIVE_NUMBER_FIELDS]
-        columns.insert(0, 'Summary (Minutes)')
-        summary_table.add_columns(*columns)
-        for metric in SUMMARY_METRICS:
-            ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
-            rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
-            rows.insert(0, metric.value.title())
-            rows[1] = int(rows[1])
-            for idx in range(2, len(rows)):  # Pretty print running times
-                if isinstance(rows[idx], Timedelta):
-                    rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
-            summary_table.add_row(*rows)
+        summary_table.loading = False
+        self.update_summary(summary_table=summary_table)
 
         age_table = self.get_widget_by_id(id=self.NumbersTables.COUNT_BY_AGE.name, expect_type=DataTable)
-        adf, age_header = count_by_age(FiveNumberApp.DF)
-        for column in age_header:
-            age_table.add_column(column, key=column)
-        age_table.add_rows(dt_to_sorted_dict(adf).items())
+        self.update_age_table(age_table=age_table)
+        age_table.loading = False
 
         gender_table = self.get_widget_by_id(id=self.NumbersTables.GENDER_BUCKET.name, expect_type=DataTable)
-        gdf, gender_header = count_by_gender(FiveNumberApp.DF)
-        for column in gender_header:
-            gender_table.add_column(column, key=column)
-        gender_table.add_rows(dt_to_sorted_dict(gdf).items())
+        self.update_gender_table(gender_table=gender_table)
+        gender_table.loading = False
 
         age_bucket_table = self.get_widget_by_id(id=self.NumbersTables.AGE_BUCKET.name, expect_type=DataTable)
-        age_categories, age_cols_head = age_bins(FiveNumberApp.DF)
-        for column in age_cols_head:
-            age_bucket_table.add_column(column, key=column)
-        age_bucket_table.add_rows(dt_to_sorted_dict(age_categories.value_counts()).items())
+        age_bucket_table.loading = False
+        self.update_age_bucket_table(age_bucket_table=age_bucket_table)
 
         time_bucket_table = self.get_widget_by_id(id=self.NumbersTables.TIME_BUCKET.name, expect_type=DataTable)
-        time_categories, time_cols_head = time_bins(FiveNumberApp.DF)
-        for column in time_cols_head:
-            time_bucket_table.add_column(column, key=column)
-        times = dt_to_sorted_dict(time_categories.value_counts()).items()
-        time_bucket_table.add_rows(times)
+        self.update_time_bucket_table(time_bucket_table=time_bucket_table)
+        time_bucket_table.loading = False
 
         country_counts_table = self.get_widget_by_id(id=self.NumbersTables.COUNTRY_COUNTS.name, expect_type=DataTable)
-        countries_counts, _, _ = get_country_counts(FiveNumberApp.DF)
-        rows = series_to_list_of_tuples(countries_counts)
-        for column in ['Country', 'Count']:
-            country_counts_table.add_column(column, key=column)
-        country_counts_table.add_rows(rows)
+        self.update_country_counts_table(country_counts_table=country_counts_table)
+        country_counts_table.loading = False
 
         self.notify(
             message=f"All metrics were calculated for {FiveNumberApp.DF.shape[0]} runners.",
@@ -146,7 +246,7 @@ class FiveNumberApp(App):
         if table.id != 'SUMMARY':
             table.sort(
                 event.column_key,
-                reverse=self.sort_reverse(event.column_key.value)
+                reverse=self.sort_reverse(str(event.column_key.value))
             )
 
 
@@ -178,6 +278,7 @@ class OutlierApp(App):
             table.cursor_type = 'row'
             table.zebra_stripes = True
             table.tooltip = "Get runner details"
+            table.loading = True
             if column_name == RaceFields.AGE:
                 label = Label(f"{column_name.value} (older) outliers (Minutes):".title())
             else:
@@ -188,24 +289,38 @@ class OutlierApp(App):
             )
         yield Footer()
 
+    @work(exclusive=False, thread=True)
+    def update_tables(self, table: DataTable, column: RaceFields) -> None:
+        columns = [x.title() for x in ['bib', column.value]]
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                table.add_columns,
+                *columns,
+            )
+        outliers = get_outliers(df=OutlierApp.DF, column=column.value)
+        self.log.info(f"Outliers {column}: {outliers} ({len(outliers.keys())})")
+        if column == RaceFields.AGE:
+            transformed_outliers = outliers.to_dict().items()
+        else:
+            transformed_outliers = []
+            for bib, timedelta in outliers.items():
+                transformed_outliers.append((bib, f"{timedelta.total_seconds() / 60.0:.2f}"))
+        self.log.info(f"Transformed Outliers {column}: {transformed_outliers}")
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                table.add_rows,
+                transformed_outliers
+            )
+
     def on_mount(self) -> None:
         """
         Initialize UI elements
         """
         for column in SUMMARY_METRICS:
             table = self.get_widget_by_id(f'col_{column.name}_outlier', expect_type=DataTable)
-            columns = [x.title() for x in ['bib', column.value]]
-            table.add_columns(*columns)
-            outliers = get_outliers(df=OutlierApp.DF, column=column.value)
-            self.log.info(f"Outliers {column}: {outliers} ({len(outliers.keys())})")
-            if column == RaceFields.AGE:
-                transformed_outliers = outliers.to_dict().items()
-            else:
-                transformed_outliers = []
-                for bib, timedelta in outliers.items():
-                    transformed_outliers.append((bib, f"{timedelta.total_seconds()/60.0:.2f}"))
-            self.log.info(f"Transformed Outliers {column}: {transformed_outliers}")
-            table.add_rows(transformed_outliers)
+            table.loading = False
+            self.update_tables(table=table, column=column)
 
         self.notify(
             message=f"All metrics were calculated for {OutlierApp.DF.shape[0]} runners.",
@@ -232,7 +347,7 @@ class OutlierApp(App):
         table = event.data_table
         table.sort(
             event.column_key,
-            reverse=self.sort_reverse(event.column_key.value)
+            reverse=self.sort_reverse(str(event.column_key.value))
         )
 
     @on(DataTable.RowSelected)
@@ -322,7 +437,7 @@ class Plotter:
         # Legend with the fastest runners by gender
         fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
-                          series.keys()]
+                          series]
         ax.legend(wedges, fastest_legend,
                   title=f"Fastest (Race year: {self.year})",
                   loc="center left",
@@ -342,7 +457,7 @@ class BrowserApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
             country_data: DataFrame = None,
@@ -352,7 +467,7 @@ class BrowserApp(App):
         Constructor
         """
         super().__init__(driver_class, css_path, watch_css)
-        self.country_data = load_country_details() if not country_data else country_data
+        self.country_data = country_data if country_data else load_country_details()
         self.df = load_json_data() if (df is None or df.empty) else df
 
     def action_quit_app(self):
@@ -366,8 +481,34 @@ class BrowserApp(App):
         UI element layout
         """
         yield Header(show_clock=True)
-        yield DataTable(id='runners')
+        table = DataTable(id='runners')
+        table.loading = True
+        yield table
         yield Footer()
+
+    @work(exclusive=True, thread=True)
+    def update_table(self, table: DataTable) -> None:
+        columns_raw, rows = df_to_list_of_tuples(df=self.df)
+        worker = get_current_worker()
+        if not worker.is_cancelled:
+            for column in columns_raw:
+                self.call_from_thread(
+                    table.add_column,
+                    column.title(),
+                    key=column
+                )
+        for number, row in enumerate(rows[0:], start=1):
+            label = Text(str(number), style="#B0FC38 italic")
+            self.call_from_thread(
+                table.add_row,
+                *row,
+                label=label
+            )
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                table.sort,
+                RaceFields.TIME.value
+            )
 
     def on_mount(self) -> None:
         """
@@ -376,13 +517,8 @@ class BrowserApp(App):
         table = self.get_widget_by_id('runners', expect_type=DataTable)
         table.zebra_stripes = True
         table.cursor_type = 'row'
-        columns_raw, rows = df_to_list_of_tuples(df=self.df)
-        for column in columns_raw:
-            table.add_column(column.title(), key=column)
-        for number, row in enumerate(rows[0:], start=1):
-            label = Text(str(number), style="#B0FC38 italic")
-            table.add_row(*row, label=label)
-        table.sort(RaceFields.TIME.value)
+        table.loading = False
+        self.update_table(table=table)
 
         self.notify(
             message=f"Loaded all data for {self.df.shape[0]} runners.",
@@ -409,7 +545,7 @@ class BrowserApp(App):
         table = event.data_table
         table.sort(
             event.column_key,
-            reverse=self.sort_reverse(event.column_key.value)
+            reverse=self.sort_reverse(str(event.column_key.value))
         )
 
     @on(DataTable.RowSelected)

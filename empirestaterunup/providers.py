@@ -1,16 +1,17 @@
 """
 Module to handle all the providers' logic.
 """
+from collections.abc import AsyncGenerator
 from functools import partial
 from typing import Any
 
 from rich.style import Style
-from textual.command import Provider, DiscoveryHit, Hit
+from textual.command import DiscoveryHit, Hit, Provider
 from textual.screen import Screen
 from textual.widgets import DataTable
 
+from empirestaterunup.data import FIELD_NAMES_AND_POS, RaceFields
 from empirestaterunup.screens import RunnerDetailScreen
-from empirestaterunup.data import RaceFields, FIELD_NAMES_AND_POS
 
 PALETTE_FIELDS = [RaceFields.BIB, RaceFields.NAME, RaceFields.COUNTRY]
 
@@ -43,7 +44,7 @@ class BrowserAppCommand(Provider):
             self.log.info(f"Table on provider: {self.table}")
             self.log.info(f"Rows:{len(self.table.rows)}")
 
-    async def discover(self) -> DiscoveryHit:
+    async def discover(self) -> AsyncGenerator[DiscoveryHit, Any]:
         """
         Pre-populate the palette with results, to give an idea how the search works
         """
@@ -66,7 +67,7 @@ class BrowserAppCommand(Provider):
                 )
             break
 
-    async def search(self, query: str) -> Hit:
+    async def search(self, query: str) -> AsyncGenerator[Hit, Any]:
         """
         Return hits based on a user query
         """

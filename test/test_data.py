@@ -6,11 +6,20 @@ import warnings
 
 from pandas import Series
 
-from empirestaterunup.analyze import find_fastest, FastestFilters
-from empirestaterunup.data import \
-    df_to_list_of_tuples, load_country_details, lookup_country_by_code, get_times, get_positions, \
-    get_categories, series_to_list_of_tuples, \
-    CountryColumns, load_json_data, RACE_RESULTS_JSON_FULL_LEVEL, RaceFields
+from empirestaterunup.analyze import FastestFilters, find_fastest
+from empirestaterunup.data import (
+    RACE_RESULTS_JSON_FULL_LEVEL,
+    CountryColumns,
+    RaceFields,
+    df_to_list_of_tuples,
+    get_categories,
+    get_positions,
+    get_times,
+    load_country_details,
+    load_json_data,
+    lookup_country_by_code,
+    series_to_list_of_tuples,
+)
 
 
 class DataTestCase(unittest.TestCase):
@@ -23,7 +32,7 @@ class DataTestCase(unittest.TestCase):
         Load data in JSON format from https://github.com/josevnz/athlinks-races/
         """
         for year in RACE_RESULTS_JSON_FULL_LEVEL:
-            warnings.warn(UserWarning(f"Loading {year}={RACE_RESULTS_JSON_FULL_LEVEL[year]}"))
+            warnings.warn(UserWarning(f"Loading {year}={RACE_RESULTS_JSON_FULL_LEVEL[year]}"), stacklevel=2)
             data = load_json_data(RACE_RESULTS_JSON_FULL_LEVEL[year])
             self.assertIsNotNone(data)
             for row in data:

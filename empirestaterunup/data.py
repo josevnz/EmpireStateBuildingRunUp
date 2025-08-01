@@ -7,7 +7,7 @@ import logging
 from collections import defaultdict
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Tuple, Union, List
+from typing import Any
 
 import pandas
 import tomlkit
@@ -52,7 +52,7 @@ class RaceFields(Enum):
 
 
 FIELD_NAMES = [x.value for x in RaceFields]
-FIELD_NAMES_AND_POS: Dict[RaceFields, int] = {field: idx for idx, field in zip(range(0, len(RaceFields)), RaceFields)}
+FIELD_NAMES_AND_POS: dict[RaceFields, int] = {field: idx for idx, field in zip(range(0, len(RaceFields)), RaceFields, strict=False)}
 
 RACE_RESULTS_JSON_FULL_LEVEL = {
     2023: Path(__file__).parent.joinpath("results-2023.json"),
@@ -169,7 +169,7 @@ def load_json_data(
 def df_to_list_of_tuples(
         df: DataFrame,
         bibs: list[int] = None
-) -> Union[Tuple | list[Tuple]]:
+) -> tuple | list[tuple]:
     """
     Take a DataFrame and return a more friendly structure to be used by a DataTable, for example.
     :param df DataFrame to convert
@@ -183,7 +183,7 @@ def df_to_list_of_tuples(
         filtered = bib_as_column[bib_as_column[RaceFields.BIB.value].isin(bibs)]
     rows = []
     for _, r in filtered.iterrows():
-        ind_row: List[Any] = []
+        ind_row: list[Any] = []
         for col in FIELD_NAMES:
             ind_row.append(r[col])
         tpl = tuple(ind_row)
@@ -192,7 +192,7 @@ def df_to_list_of_tuples(
     return tuple(FIELD_NAMES), rows
 
 
-def series_to_list_of_tuples(series: Series) -> list[Tuple]:
+def series_to_list_of_tuples(series: Series) -> list[tuple]:
     """
     Helper series to list of tuples
     """
@@ -222,7 +222,7 @@ def load_country_details(data_file: Path = None) -> TOMLDocument:
 
     """
     def_file = COUNTRY_DETAILS if data_file is None else data_file
-    with open(def_file, 'r', encoding='utf-8') as f:
+    with open(def_file, encoding='utf-8') as f:
         data = tomlkit.load(fp=f)
         return data
 
@@ -247,7 +247,7 @@ class CountryColumns(Enum):
 COUNTRY_COLUMNS = [country.value for country in CountryColumns]
 
 
-def lookup_country_by_code(country_data: TOMLDocument, letter_code: str) -> Union[Tuple[str, TOMLDocument], None]:
+def lookup_country_by_code(country_data: TOMLDocument, letter_code: str) -> tuple[str, TOMLDocument] | None:
     """
     Args:
         country_data (TOMLDocument): TOML document with country details

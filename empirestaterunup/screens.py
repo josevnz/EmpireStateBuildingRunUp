@@ -1,11 +1,12 @@
 """
 Module to handle all the sub-screen details.
 """
-from typing import List, Any, Dict, Union, Tuple
+from typing import Any
+
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import ModalScreen
-from textual.widgets import MarkdownViewer, Button, DataTable
+from textual.widgets import Button, DataTable, MarkdownViewer
 
 from empirestaterunup.data import FIELD_NAMES_AND_POS, RaceFields
 
@@ -22,7 +23,7 @@ class RunnerDetailScreen(ModalScreen):
             name: str | None = None,
             ident: str | None = None,
             classes: str | None = None,
-            row: List[Any] | None = None,
+            row: list[Any] | None = None,
             table: DataTable | None = None,
             debug: bool = True,
     ):
@@ -42,7 +43,7 @@ class RunnerDetailScreen(ModalScreen):
         bib = [self.row[bib_idx]][0]
         row_markdown = ""
         if self.table:
-            col_map: Dict[int, str] = {idx: val.label.plain for idx, val in zip(range(0, len(self.table.columns)), self.table.columns.values())}
+            col_map: dict[int, str] = {idx: val.label.plain for idx, val in zip(range(0, len(self.table.columns)), self.table.columns.values(), strict=False)}
             if self.debug:
                 col_def = dict(self.table.columns.items())
                 self.log.info(f"Columns def: {col_def}")
@@ -80,7 +81,7 @@ class OutlierDetailScreen(ModalScreen):
             name: str | None = None,
             ident: str | None = None,
             classes: str | None = None,
-            runner_data: Union[Tuple | list[Tuple]] = None,
+            runner_data: tuple | list[tuple] = None,
             debug: bool = True,
     ):
         """
@@ -101,7 +102,7 @@ York', 'Massapequa', Timedelta('0 days 01:05:19'), Timedelta('0 days 00:07:52'),
         if self.runner_data:
             if self.debug:
                 self.log.info(f"Runners data: {self.runner_data}")
-            for col_name, value in zip(self.runner_data[0], self.runner_data[1][0]):
+            for col_name, value in zip(self.runner_data[0], self.runner_data[1][0], strict=False):
                 row_markdown += f"* **{col_name.title()}**: {value}\n"
 
         yield MarkdownViewer(f"""# Full Course Race details

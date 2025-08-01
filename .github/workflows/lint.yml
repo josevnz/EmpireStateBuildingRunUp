@@ -1,0 +1,35 @@
+# Run code through Ruff, Yamllint
+---
+name: Empire State Run Up code linting
+permissions:
+  contents: "read"
+"on":
+  - 'push'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - '3.11'
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Set up Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v3
+        with:
+          python-version: '${{ matrix.python-version }}'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --editable .[dev,lint]
+      - name: Check packaging with twine
+        run: |
+          python -m build .
+          twine check dist/empirestaterunup-*.whl
+      - name: Analysing the Empire State Run Up code with Ruff
+        run: |
+          ruff check empirestaterunup
+          ruff check test
+      - name: Analysing the Empire State Run Up code with Yamllint
+        run: |
+          yamllint .github/workflows/*.yml

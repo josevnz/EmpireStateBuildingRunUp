@@ -134,6 +134,7 @@ sru_server --application esru_browser empirestaterunup/results-2023.json
 I used [athlinks-races](https://pypi.org/project/athlinks-races/) to parse the race results. This is an example of a scrapping session:
 
 ```shell
-uvx --from athlinks_races athlinks_races_cli --metadata_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/metadata-2023.json --athletes_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/results-2023.json --format jsonlines --race_url https://www.athlinks.com/event/382111/results/Event/1062909/Results
+uvx --from athlinks_races athlinks_races_cli --metadata_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/metadata-2025.json --athletes_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/results-2025.json --format jsonlines --race_url https://www.athlinks.com/event/382111/results/Event/1124263/Results
 uvx --from athlinks_races athlinks_races_cli --metadata_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/metadata-2024.json --athletes_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/results-2024.json --format jsonlines --race_url https://www.athlinks.com/event/382111/results/Event/1093108/Results
+uvx --from athlinks_races athlinks_races_cli --metadata_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/metadata-2023.json --athletes_rpt /home/josevnz/EmpireStateBuildingRunUp/empirestaterunup/results-2023.json --format jsonlines --race_url https://www.athlinks.com/event/382111/results/Event/1062909/Results
 ```

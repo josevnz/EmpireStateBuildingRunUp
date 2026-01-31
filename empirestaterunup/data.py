@@ -22,7 +22,8 @@ at the same time.
 """
 BASE_RACE_DATETIME = {
     2023: datetime.datetime(year=2023, month=9, day=4, hour=20, minute=0, second=0, microsecond=0),
-    2024: datetime.datetime(year=2024, month=9, day=9, hour=20, minute=0, second=0, microsecond=0)
+    2024: datetime.datetime(year=2024, month=9, day=9, hour=20, minute=0, second=0, microsecond=0),
+    2025: datetime.datetime(year=2025, month=9, day=8, hour=20, minute=0, second=0, microsecond=0),
 }
 
 
@@ -56,9 +57,10 @@ FIELD_NAMES_AND_POS: dict[RaceFields, int] = {field: idx for idx, field in zip(r
 
 RACE_RESULTS_JSON_FULL_LEVEL = {
     2023: Path(__file__).parent.joinpath("results-2023.json"),
-    2024: Path(__file__).parent.joinpath("results-2024.json")
+    2024: Path(__file__).parent.joinpath("results-2024.json"),
+    2025: Path(__file__).parent.joinpath("results-2025.json")
 }
-DEFAULT_YEAR = 2024
+DEFAULT_YEAR = 2025
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
 
 
@@ -262,6 +264,11 @@ def lookup_country_by_code(country_data: TOMLDocument, letter_code: str) -> tupl
             if letter_code == country_details['alpha-3']:
                 return country_name, country_details
     elif len(letter_code) == 2:
+        for country_name, country_details in country_data.items():
+            if letter_code == country_details['alpha-2']:
+                return country_name, country_details
+    elif len(letter_code) <= 1:
+        letter_code = "XX"
         for country_name, country_details in country_data.items():
             if letter_code == country_details['alpha-2']:
                 return country_name, country_details

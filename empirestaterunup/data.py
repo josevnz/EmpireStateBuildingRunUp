@@ -56,18 +56,19 @@ FIELD_NAMES = [x.value for x in RaceFields]
 FIELD_NAMES_AND_POS: dict[RaceFields, int] = {field: idx for idx, field in zip(range(0, len(RaceFields)), RaceFields, strict=False)}
 
 RACE_RESULTS_JSON_FULL_LEVEL = {
-    2023: Path(__file__).parent.joinpath("results-2023.json"),
-    2024: Path(__file__).parent.joinpath("results-2024.json"),
-    2025: Path(__file__).parent.joinpath("results-2025.json")
+    2023: Path(__file__).parent.joinpath("results-2023.jsonl"),
+    2024: Path(__file__).parent.joinpath("results-2024.jsonl"),
+    2025: Path(__file__).parent.joinpath("results-2025.jsonl")
 }
 DEFAULT_YEAR = 2025
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
+LOCATION_DETAILS = Path(__file__).parent.joinpath("location_lookup.toml")
 
 
 def load_json_data(
         data_file: Path = None,
         remove_dnf: bool = True,
-        default_year: int = 2023,
+        default_year: int = DEFAULT_YEAR,
         use_pretty: bool = False
 ) -> DataFrame:
     """
@@ -163,7 +164,6 @@ def load_json_data(
                 df[time_field] = df[time_field].apply(PrettyDuration)
         except ValueError as ve:
             raise ValueError(f'{time_field}={df[time_field]}', ve) from ve
-    # df['finishtimestamp'] = BASE_RACE_DATETIME[default_year] + df[RaceFields.TIME.value]
 
     return df
 
@@ -174,9 +174,10 @@ def df_to_list_of_tuples(
 ) -> tuple | list[tuple]:
     """
     Take a DataFrame and return a more friendly structure to be used by a DataTable, for example.
-    :param df DataFrame to convert
-    :param bibs List of racing BIB to filter
-    :return list of Tuple of rows, Tuple with columns
+    Args:
+        param df DataFrame to convert
+        param bibs List of racing BIB to filter
+    return list of Tuple of rows, Tuple with columns
     """
     bib_as_column = df.reset_index(level=0, inplace=False)
     if not bibs:
@@ -229,6 +230,22 @@ def load_country_details(data_file: Path = None) -> TOMLDocument:
         return data
 
 
+def load_location_lookup(data_file: Path = None) -> TOMLDocument:
+    """
+    Args:
+        data_file (Path): Path to data file in TOML format
+        [albany]
+        alpha-2 = "US"
+
+        [albuquerque]
+        alpha-2 = "US"
+    """
+    def_file = LOCATION_DETAILS if data_file is None else data_file
+    with open(def_file, encoding='utf-8') as f:
+        data = tomlkit.load(fp=f)
+        return data
+
+
 class CountryColumns(Enum):
     """
     Country columns
@@ -249,7 +266,10 @@ class CountryColumns(Enum):
 COUNTRY_COLUMNS = [country.value for country in CountryColumns]
 
 
-def lookup_country_by_code(country_data: TOMLDocument, letter_code: str) -> tuple[str, TOMLDocument] | None:
+def lookup_country_by_code(
+        country_data: TOMLDocument,
+        letter_code: str
+) -> tuple[str, TOMLDocument] | None:
     """
     Args:
         country_data (TOMLDocument): TOML document with country details
@@ -257,20 +277,13 @@ def lookup_country_by_code(country_data: TOMLDocument, letter_code: str) -> tupl
     Returns:
         TOML document with country details, none if the lookup fails
     """
-    if not isinstance(letter_code, str):
-        raise ValueError(f"Invalid type for three letter country code: '{letter_code}'")
     if len(letter_code) == 3:
         for country_name, country_details in country_data.items():
-            if letter_code == country_details['alpha-3']:
+            if letter_code == country_details[CountryColumns.ALPHA_3.value]:
                 return country_name, country_details
     elif len(letter_code) == 2:
         for country_name, country_details in country_data.items():
-            if letter_code == country_details['alpha-2']:
-                return country_name, country_details
-    elif len(letter_code) <= 1:
-        letter_code = "XX"
-        for country_name, country_details in country_data.items():
-            if letter_code == country_details['alpha-2']:
+            if letter_code == country_details[CountryColumns.ALPHA_2.value]:
                 return country_name, country_details
     else:
         raise ValueError(f"Invalid letter country code: '{letter_code}'")
@@ -331,3 +344,16 @@ class PrettyDuration:
         if other is not None:
             return self.duration.total_seconds() < other.duration.total_seconds()
         raise ValueError(f"Not a PrettyDuration: {other}")
+
+
+class LocationLookup(Enum):
+    """
+    Location lookup columns
+    """
+    ALPHA_2 = "alpha-2"
+
+
+def location_lookup(lookup_data: TOMLDocument, locality: str, default: str = "US") -> str:
+    if locality in lookup_data:
+        return lookup_data[locality][LocationLookup.ALPHA_2.value]
+    return default

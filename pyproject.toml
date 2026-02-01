@@ -52,6 +52,7 @@ esru_outlier = "empirestaterunup.runners:run_outlier"
 esru_browser = "empirestaterunup.runners:run_browser"
 esru_plot = "empirestaterunup.runners:simple_plot"
 esru_server = "empirestaterunup.server:main"
+esru_enricher = "empirestaterunup.runners:run_enricher"
 
 
 [tool.setuptools]

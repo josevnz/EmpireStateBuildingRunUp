@@ -1,0 +1,527 @@
+["albany"]
+alpha-2 = ""
+
+["albuquerque"]
+alpha-2 = "US"
+
+["alexandria"]
+alpha-2 = "US"
+
+["altamonte"]
+alpha-2 = "US"
+
+["ames"]
+alpha-2 = "US"
+
+["angier"]
+alpha-2 = "US"
+
+["armonk"]
+alpha-2 = "US"
+
+["astoria"]
+alpha-2 = "US"
+
+["athens"]
+alpha-2 = "US"
+
+["aventura"]
+alpha-2 = "US"
+
+["belmont"]
+alpha-2 = "US"
+
+["bennington"]
+alpha-2 = "US"
+
+["berkeley"]
+alpha-2 = "US"
+
+["berlin"]
+alpha-2 = "DE"
+
+["bethel"]
+alpha-2 = "US"
+
+["bilbao"]
+alpha-2 = "ES"
+
+["boston"]
+alpha-2 = "US"
+
+["bratislava"]
+alpha-2 = "SK"
+
+["breezy point"]
+alpha-2 = "US"
+
+["bristol"]
+alpha-2 = "US"
+
+["bronx"]
+alpha-2 = "US"
+
+["bronxville"]
+alpha-2 = "US"
+
+["brookline"]
+alpha-2 = "US"
+
+["brooklyn"]
+alpha-2 = "US"
+
+["burlington"]
+alpha-2 = "US"
+
+["byron center"]
+alpha-2 = "US"
+
+["calgary"]
+alpha-2 = "CA"
+
+["carmel"]
+alpha-2 = "US"
+
+["catarroja"]
+alpha-2 = "ES"
+
+["cessnock"]
+alpha-2 = "AU"
+
+["charlotte"]
+alpha-2 = "US"
+
+["cherry hill"]
+alpha-2 = "US"
+
+["cheshire"]
+alpha-2 = "US"
+
+["chicago"]
+alpha-2 = "US"
+
+["christies beach"]
+alpha-2 = "AU"
+
+["ciudad"]
+alpha-2 = ""
+
+["cleveland"]
+alpha-2 = "US"
+
+["clifton"]
+alpha-2 = "US"
+
+["college point"]
+alpha-2 = "US"
+
+["colorado springs"]
+alpha-2 = "US"
+
+["commack"]
+alpha-2 = "US"
+
+["curridabat"]
+alpha-2 = "CR"
+
+["denver"]
+alpha-2 = "US"
+
+["duarte"]
+alpha-2 = "US"
+
+["duebendorf"]
+alpha-2 = "CH"
+
+["durham"]
+alpha-2 = "US"
+
+["east elmhurst"]
+alpha-2 = "US"
+
+["east islip"]
+alpha-2 = "US"
+
+["east meadow"]
+alpha-2 = "US"
+
+["east rockaway"]
+alpha-2 = "US"
+
+["esbjerg"]
+alpha-2 = "DK"
+
+["fairfield"]
+alpha-2 = "US"
+
+["fayetteville"]
+alpha-2 = "US"
+
+["floral park"]
+alpha-2 = "US"
+
+["fort lee"]
+alpha-2 = "US"
+
+["fort mitchell"]
+alpha-2 = "US"
+
+["frederick"]
+alpha-2 = "US"
+
+["garden city"]
+alpha-2 = "US"
+
+["glenmont"]
+alpha-2 = "US"
+
+["grand rapids"]
+alpha-2 = "US"
+
+["grayslake"]
+alpha-2 = "US"
+
+["great barrington"]
+alpha-2 = "US"
+
+["greenlawn"]
+alpha-2 = "US"
+
+["greenwich"]
+alpha-2 = "US"
+
+["hagerstown"]
+alpha-2 = "US"
+
+["hoboken"]
+alpha-2 = "US"
+
+["hong kong"]
+alpha-2 = "HK"
+
+["horb"]
+alpha-2 = "DE"
+
+["hudson"]
+alpha-2 = "US"
+
+["huntington"]
+alpha-2 = "US"
+
+["indianapolis"]
+alpha-2 = "US"
+
+["irvington"]
+alpha-2 = "US"
+
+["jamaica"]
+alpha-2 = "US"
+
+["jersey city"]
+alpha-2 = "US"
+
+["kalamazoo"]
+alpha-2 = "US"
+
+["kensington nsw"]
+alpha-2 = "AU"
+
+["kuala lumpur"]
+alpha-2 = "MY"
+
+["lake grove"]
+alpha-2 = "US"
+
+["lake oswego"]
+alpha-2 = "US"
+
+["lake stevens"]
+alpha-2 = "US"
+
+["leeds"]
+alpha-2 = "GB"
+
+["london"]
+alpha-2 = "GB"
+
+["long island city"]
+alpha-2 = "US"
+
+["longmont"]
+alpha-2 = "US"
+
+["los angeles"]
+alpha-2 = "US"
+
+["loveland"]
+alpha-2 = "US"
+
+["lynbrook"]
+alpha-2 = "US"
+
+["madeira beach"]
+alpha-2 = "US"
+
+["madison"]
+alpha-2 = "US"
+
+["madrid"]
+alpha-2 = "ES"
+
+["malemort du comtat"]
+alpha-2 = "FR"
+
+["mamaroneck"]
+alpha-2 = "US"
+
+["maplewood"]
+alpha-2 = "US"
+
+["marblehead"]
+alpha-2 = "US"
+
+["massapequa"]
+alpha-2 = "US"
+
+["messina"]
+alpha-2 = "IT"
+
+["metuchen"]
+alpha-2 = "US"
+
+["mexico"]
+alpha-2 = "MX"
+
+["muskegon"]
+alpha-2 = "US"
+
+["navan"]
+alpha-2 = "IE"
+
+["new sarepta"]
+alpha-2 = "CA"
+
+["newton center"]
+alpha-2 = "US"
+
+["new york"]
+alpha-2 = "US"
+
+["new york york"]
+alpha-2 = ""
+
+["northport"]
+alpha-2 = "US"
+
+["norwalk"]
+alpha-2 = "US"
+
+["omaha"]
+alpha-2 = "US"
+
+["osasco"]
+alpha-2 = "BR"
+
+["oslo"]
+alpha-2 = "NO"
+
+["ottawa"]
+alpha-2 = "CA"
+
+["oyster bay"]
+alpha-2 = "US"
+
+["palmerstown"]
+alpha-2 = "IE"
+
+["palos verdes peninsula"]
+alpha-2 = "US"
+
+["patchogue"]
+alpha-2 = "US"
+
+["petaling jaya"]
+alpha-2 = "MY"
+
+["pforzheim"]
+alpha-2 = "DE"
+
+["piscataway"]
+alpha-2 = "US"
+
+["pittsburgh"]
+alpha-2 = "US"
+
+["plainview"]
+alpha-2 = "US"
+
+["portland"]
+alpha-2 = "US"
+
+["poughkeepsie"]
+alpha-2 = "US"
+
+["powell"]
+alpha-2 = "US"
+
+["princeton"]
+alpha-2 = "US"
+
+["providence"]
+alpha-2 = "US"
+
+["provo"]
+alpha-2 = "US"
+
+["raritan"]
+alpha-2 = "US"
+
+["renton"]
+alpha-2 = "US"
+
+["riverdale"]
+alpha-2 = "US"
+
+["riyadh"]
+alpha-2 = "SA"
+
+["round rock"]
+alpha-2 = "US"
+
+["san antonio"]
+alpha-2 = "US"
+
+["san diego"]
+alpha-2 = "US"
+
+["san francisco"]
+alpha-2 = "US"
+
+["san isidro"]
+alpha-2 = "PE"
+
+["san siro"]
+alpha-2 = "IT"
+
+["santa monica"]
+alpha-2 = "US"
+
+["sao paulo"]
+alpha-2 = "BR"
+
+["schenectady"]
+alpha-2 = "US"
+
+["seattle"]
+alpha-2 = "US"
+
+["seoul"]
+alpha-2 = "KR"
+
+["shoreline"]
+alpha-2 = "US"
+
+["silver spring"]
+alpha-2 = "US"
+
+["smithtown"]
+alpha-2 = "US"
+
+["south croydon"]
+alpha-2 = "GB"
+
+["south dennis"]
+alpha-2 = "US"
+
+["sparrow bush"]
+alpha-2 = "US"
+
+["spiez"]
+alpha-2 = "CH"
+
+["springfield"]
+alpha-2 = "US"
+
+["staten island"]
+alpha-2 = "US"
+
+["sterling"]
+alpha-2 = "US"
+
+["sunnyside"]
+alpha-2 = "US"
+
+["syosset"]
+alpha-2 = "US"
+
+["székesfehérvár"]
+alpha-2 = "HU"
+
+["tampa"]
+alpha-2 = "US"
+
+["taoyuan city"]
+alpha-2 = "TW"
+
+["trumbull"]
+alpha-2 = "US"
+
+["ventura"]
+alpha-2 = "US"
+
+["vienna"]
+alpha-2 = "AT"
+
+["virginia beach"]
+alpha-2 = "US"
+
+["warsaw"]
+alpha-2 = "PL"
+
+["washington"]
+alpha-2 = "US"
+
+["waterbury"]
+alpha-2 = "US"
+
+["watertown"]
+alpha-2 = "US"
+
+["wauwatosa"]
+alpha-2 = "US"
+
+["wayne"]
+alpha-2 = "US"
+
+["wecker"]
+alpha-2 = "LU"
+
+["westbury"]
+alpha-2 = "US"
+
+["westfield"]
+alpha-2 = "US"
+
+["west hempstead"]
+alpha-2 = "US"
+
+["west islip"]
+alpha-2 = "US"
+
+["westlake village"]
+alpha-2 = "US"
+
+["weston"]
+alpha-2 = "US"
+
+["westwood"]
+alpha-2 = "US"
+
+["wethersfield"]
+alpha-2 = "US"
+
+["weymouth"]
+alpha-2 = "GB"
+
+["wyncote"]
+alpha-2 = "US"

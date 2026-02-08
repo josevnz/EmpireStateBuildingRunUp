@@ -3,25 +3,25 @@ requires = [
     "setuptools >= 80.0.0",
     "wheel",
     "build>=1.2.1",
-    "pip"
+    "pip==26.0.1"
 
 ]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 lint = [
-    "ruff==0.12.0",
-    "yamllint==1.28.0"
+    "ruff==0.15.0",
+    "yamllint==1.38.0",
 ]
 dev = [
-    "textual-dev==1.7.0",
-    "twine==6.1.0",
+    "textual-dev==1.8.0",
+    "twine==6.2.0",
     "build"
 ]
 
 [project]
 name = "EmpireStateRunUp"
-version = "2025.0.3"
+version = "2025.1.0"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -38,12 +38,12 @@ classifiers = [
 ]
 dependencies = [
     "pandas==2.2.3",
-    "textual==3.7.1",
-    "textual-serve==1.1.1",
-    "rich==13.9.4",
+    "textual==7.5.0",
+    "textual-serve==1.1.3",
+    "rich==14.3.2",
     "numpy==1.26.4",
-    "matplotlib==3.10.0",
-    "tomlkit==0.13.2"
+    "matplotlib==3.10.8",
+    "tomlkit==0.14.0",
 ]
 license = {file = "LICENSE"}
 [project.scripts]
@@ -52,6 +52,7 @@ esru_outlier = "empirestaterunup.runners:run_outlier"
 esru_browser = "empirestaterunup.runners:run_browser"
 esru_plot = "empirestaterunup.runners:simple_plot"
 esru_server = "empirestaterunup.server:main"
+esru_enricher = "empirestaterunup.runners:run_enricher"
 
 
 [tool.setuptools]

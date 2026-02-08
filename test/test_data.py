@@ -8,6 +8,7 @@ from pandas import Series
 
 from empirestaterunup.analyze import FastestFilters, find_fastest
 from empirestaterunup.data import (
+    LOCATION_DETAILS,
     RACE_RESULTS_JSON_FULL_LEVEL,
     CountryColumns,
     RaceFields,
@@ -17,6 +18,8 @@ from empirestaterunup.data import (
     get_times,
     load_country_details,
     load_json_data,
+    load_location_lookup,
+    location_lookup,
     lookup_country_by_code,
     series_to_list_of_tuples,
 )
@@ -163,6 +166,16 @@ class DataTestCase(unittest.TestCase):
         self.assertIsNotNone(fastest)
         self.assertTrue(fastest)
         self.assertEqual(7, len(fastest))
+
+    def test_location_lookup(self):
+        ll = load_location_lookup(data_file=LOCATION_DETAILS)
+        self.assertIsNotNone(ll)
+
+        two_letter_country = location_lookup(lookup_data=ll, locality="norwalk")
+        self.assertEqual("US", two_letter_country)
+
+        two_letter_country = location_lookup(lookup_data=ll, locality="merida", default="VE")
+        self.assertEqual("VE", two_letter_country)
 
 
 if __name__ == '__main__':

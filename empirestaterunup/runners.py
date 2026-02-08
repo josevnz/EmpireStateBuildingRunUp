@@ -4,6 +4,7 @@ I wrote this script to normalize the data results from the 'Empire State Buildin
 
 Author Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
+import json
 import logging
 from argparse import ArgumentParser
 from pathlib import Path
@@ -17,6 +18,7 @@ from empirestaterunup.data import (
     load_country_details,
     load_json_data,
 )
+from empirestaterunup.devtools import enrich_race_results
 
 logging.basicConfig(format='%(asctime)s %(message)s', encoding='utf-8', level=logging.INFO)
 RESULTS = list(RACE_RESULTS_JSON_FULL_LEVEL.keys())
@@ -145,3 +147,41 @@ def run_browser():
     app.title = "Race runners".title()
     app.sub_title = f"Browse details: {app.df.shape[0]} (Year: {options.results})"
     app.run()
+
+
+def run_enricher():
+    """
+    Entry point to run race results raw data enricher
+    """
+    parser = ArgumentParser(description="Enrich race results")
+    parser.add_argument(
+        "--location-lookup-file",
+        action="store",
+        type=Path,
+        required=True,
+        help="Location lookup toml file "
+    )
+    parser.add_argument(
+        "--raw-race-results-file",
+        action="store",
+        type=Path,
+        required=True,
+        help="Location of raw race results"
+    )
+    parser.add_argument(
+        "enriched_race_results_file",
+        action="store",
+        type=Path,
+        help="Destination of enriched race results"
+    )
+    options = parser.parse_args()
+    if options.enriched_race_results_file == options.raw_race_results_file:
+        raise ValueError("Raw race results cannot be the same as the enriched file!")
+
+    enriched_data = enrich_race_results(
+        race_results_file=options.raw_race_results_file,
+        location_lookup_file=options.location_lookup_file
+    )
+    with open(options.enriched_race_results_file.as_posix(), 'w') as outfile:
+        for race_result in enriched_data:
+            print(json.dumps(race_result), file=outfile)

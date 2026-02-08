@@ -12,7 +12,7 @@ class DevtoolsTestCase(unittest.TestCase):
         rr = enrich_race_results(race_results_file=TEST_RACE_FILE, location_lookup_file=LOCATION_DETAILS)
         self.assertIsNotNone(rr)
         for rs in rr:
-            self.assertNotEquals('', rs[RaceFields.COUNTRY.value])
+            self.assertNotEqual('', rs[RaceFields.COUNTRY.value])
 
 
 if __name__ == '__main__':

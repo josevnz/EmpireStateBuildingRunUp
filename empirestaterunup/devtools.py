@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas
 
-from empirestaterunup.data import load_location_lookup, location_lookup, RaceFields
+from empirestaterunup.data import RaceFields, load_location_lookup, location_lookup
 
 
 def enrich_race_results(

@@ -6,9 +6,7 @@
 
 ![ESRU browser](images/esru_browser.png)
 
-
-
-Hello. I wrote an application to analyse the results of the 'Empire State Run Up', 2013 edition, after I ran the race. 
+Hello. I wrote an application to analyse the results of the 'Empire State Run Up', 2013 edition, after I ran the race.
 
 Here you will find my code.
 
@@ -64,7 +62,7 @@ pip install textual-dev
 textual run --dev empirestaterunup.apps:run_outlier 
 ```
 
-### Packaging 
+### Packaging
 
 ```shell
 python3 -m venv ~/virtualenv/EmpireStateRunUp
@@ -78,6 +76,7 @@ python -m build .
 ### Installation from PiPy
 
 For your user:
+
 ```shell
 pip install --user EmpireStateRunUp
 ```

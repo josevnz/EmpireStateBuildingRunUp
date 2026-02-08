@@ -430,14 +430,14 @@ class Plotter:
             autopct="%%%.2f",
             shadow=True,
             startangle=90,
-            explode=(0.1, 0, 0)
         )
+
         ax.set_title = "Gender participation"
         ax.set_xlabel(f'Gender (Race year: {self.year})')
         # Legend with the fastest runners by gender
         fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
-                          series]
+                              fastest]
         ax.legend(wedges, fastest_legend,
                   title=f"Fastest (Race year: {self.year})",
                   loc="center left",

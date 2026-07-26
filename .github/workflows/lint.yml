@@ -24,14 +24,15 @@ jobs:
           python-version: '${{ matrix.python-version }}'
       - name: Install dependencies
         run: |
-          uv pip install --editable .[dev,lint]
+          uv sync --dev
+          uv pip install --editable .
       - name: Check packaging with twine
         run: |
           uv build
       - name: Analysing the Empire State Run Up code with Ruff
         run: |
-          ruff check empirestaterunup
-          ruff check test
+          uv run ruff check empirestaterunup
+          uv run ruff check test
       - name: Analysing the Empire State Run Up code with Yamllint
         run: |
           yamllint .github/workflows/*.yml

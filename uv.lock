@@ -281,6 +281,7 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "ruff" },
     { name = "textual-dev" },
     { name = "uv" },
 ]
@@ -295,6 +296,7 @@ requires-dist = [
     { name = "numpy", specifier = "==1.26.4" },
     { name = "pandas", specifier = "==2.2.3" },
     { name = "rich", specifier = "==14.3.2" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.15.0" },
     { name = "ruff", marker = "extra == 'lint'", specifier = "==0.15.0" },
     { name = "textual", specifier = "==7.5.0" },
     { name = "textual-dev", marker = "extra == 'dev'", specifier = "==1.8.0" },

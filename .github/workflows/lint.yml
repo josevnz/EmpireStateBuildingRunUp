@@ -26,6 +26,7 @@ jobs:
         run: |
           uv sync --dev
           uv pip install --editable .
+          uv tool install ruff
       - name: Check packaging with twine
         run: |
           uv build

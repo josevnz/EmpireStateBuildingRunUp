@@ -5,10 +5,10 @@ author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 import re
 from datetime import timedelta
 from enum import Enum
-from typing import Any
+from typing import Any, Dict, Tuple
 
 import numpy as np
-import pandas
+import pandas as pd
 from pandas import Categorical, DataFrame, Series
 
 from empirestaterunup.data import RaceFields
@@ -32,21 +32,23 @@ def get_5_number(criteria: str, data: DataFrame) -> DataFrame:
     return data[criteria].describe()
 
 
-def count_by_age(data: DataFrame) -> tuple[DataFrame, tuple]:
+def count_by_age(data: DataFrame) -> Tuple[DataFrame, Tuple[str, str]]:
     """
     Counts by age
     """
-    return data.groupby(RaceFields.AGE.value)[RaceFields.AGE.value].count(), ('Age', 'Count')
+    counts = data[RaceFields.AGE.value].value_counts().sort_index()
+    return counts.rename_axis(RaceFields.AGE.value).reset_index(name='Count'), ('Age', 'Count')
 
 
-def count_by_gender(data: DataFrame) -> tuple[DataFrame, tuple]:
+def count_by_gender(data: DataFrame) -> Tuple[DataFrame, Tuple[str, str]]:
     """
     Counts by gender
     """
-    return data.groupby(RaceFields.GENDER.value)[RaceFields.GENDER.value].count(), ('Gender', 'Count')
+    counts = data[RaceFields.GENDER.value].value_counts().sort_index()
+    return counts.rename_axis(RaceFields.GENDER.value).reset_index(name='Count'), ('Gender', 'Count')
 
 
-def dt_to_sorted_dict(df: DataFrame | Series) -> dict:
+def dt_to_sorted_dict(df: DataFrame | Series) -> Dict[str, Any]:
     """
     Convert to sorted dict
     """
@@ -58,40 +60,36 @@ def get_zscore(df: DataFrame, column: str):
     Get Z-score for given column
     """
     filtered = df[column]
-    return filtered.sub(filtered.mean()).div(filtered.std(ddof=0))
+    mean = filtered.mean()
+    std = filtered.std(ddof=0)
+    return (filtered - mean) / std
 
 
 def get_outliers(df: DataFrame, column: str, std_threshold: int = 3) -> Series:
     """
     Use the z-score, anything further away than 3 standard deviations is considered an outlier.
     """
-    filtered_df = df[column]
     z_scores = get_zscore(df=df, column=column)
-    is_over = np.abs(z_scores) > std_threshold
-    return filtered_df[is_over]
+    return df[column][np.abs(z_scores) > std_threshold]
 
 
-def age_bins(df: DataFrame) -> tuple[Categorical, tuple]:
+def age_bins(df: DataFrame) -> Tuple[Categorical, Tuple[str, str]]:
     """
     Group ages into age buckets
     """
-    ages = [r * 10 for r in range(1, 11)]
-    labels = [f"[{age} - {age + 10}]" for age in ages[:-1]]
-    categories: Categorical = pandas.cut(df[RaceFields.AGE.value], ages, labels=labels)
-    return categories, ('Age', 'Count')
+    bins = pd.cut(df[RaceFields.AGE.value], range(10, 110, 10), right=False)
+    return bins.rename('Age Bucket'), ('Age', 'Count')
 
 
-def time_bins(df: DataFrame) -> tuple[Categorical, tuple]:
+def time_bins(df: DataFrame) -> Tuple[Categorical, Tuple[str, str]]:
     """
     Group finish times into time buckets
     """
-    times = [timedelta(minutes=r * 10) for r in range(1, 13)]
-    labels = [f"[{r * 10} - {(r + 1) * 10}]" for r in range(1, 12)]
-    categories: Categorical = pandas.cut(df[RaceFields.TIME.value], times, labels=labels)
-    return categories, ('Time', 'Count')
+    bins = pd.cut(df[RaceFields.TIME.value], [timedelta(minutes=i * 10) for i in range(13)], right=False)
+    return bins.rename('Time Bucket'), ('Time', 'Count')
 
 
-def get_country_counts(df: DataFrame, min_participants: int = 5, max_participants: int = 5) -> tuple[Series, Series, Series]:
+def get_country_counts(df: DataFrame, min_participants: int = 5, max_participants: int = 5) -> Tuple[Series, Series, Series]:
     """
     Gen interesting country counts
     :param df DataFrame to query
@@ -100,13 +98,14 @@ def get_country_counts(df: DataFrame, min_participants: int = 5, max_participant
     :return country counts (unfiltered), countries, which countries with less than max_participants grouped under 'Others'
     """
     countries = df[RaceFields.COUNTRY.value]
-    countries_counts = countries.value_counts()
-    min_country_filter = countries_counts[countries_counts.values > min_participants]
-    max_country_filter = countries_counts[countries_counts.values < max_participants]
-    return countries_counts, min_country_filter, max_country_filter
+    counts = countries.value_counts()
+    min_count_filter = counts[counts > min_participants]
+    max_count_filter = counts[counts < max_participants]
+    others = pd.Series({'Others': counts.sum()})
+    return counts, min_count_filter.append(others), max_count_filter
 
 
-def find_fastest(df: DataFrame, criteria: FastestFilters) -> dict[str, dict[str, Any]]:
+def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Any]:
     """
     Find the fastest runners, per category
     :param df Dataframe to analyze
@@ -115,45 +114,32 @@ def find_fastest(df: DataFrame, criteria: FastestFilters) -> dict[str, dict[str,
     """
     results = {}
     if criteria == FastestFilters.AGE:
-        age_bucket, _ = age_bins(df)
-        buckets = age_bucket.unique()
-        for bucket in buckets:
-            matcher = re.search('(\\d+) - (\\d+)', bucket)
-            if matcher:
-                low = int(matcher.group(1))
-                high = int(matcher.group(2))
-                runners_by_bucket = df[(df[RaceFields.AGE.value] >= low) & (df[RaceFields.AGE.value] <= high)]
-                fastest_time = runners_by_bucket[RaceFields.TIME.value].min()
-                fastest_runner = runners_by_bucket[(runners_by_bucket[RaceFields.TIME.value]) == fastest_time]
-                name = fastest_runner.name.values[0]
-                age = fastest_runner.age.values[0]
-                results[bucket] = {
-                    "name": name,
-                    "age": age,
-                    "time": fastest_time
-                }
-    elif criteria == FastestFilters.GENDER:
-        genders = df[RaceFields.GENDER.value].unique()
-        for gender in genders:
-            runners_by_gender = df[(df[RaceFields.GENDER.value] == gender)]
-            fastest_time = runners_by_gender[RaceFields.TIME.value].min()
-            fastest_runner = runners_by_gender[(runners_by_gender[RaceFields.TIME.value]) == fastest_time]
-            name = fastest_runner.name.values[0]
-            gender = fastest_runner.gender.values[0]
-            results[gender] = {
-                "name": name,
+        bins = pd.cut(df[RaceFields.AGE.value], range(10, 110, 10), right=False)
+        for bucket in bins.unique():
+            runners_by_bucket = df[bins == bucket]
+            fastest_time = runners_by_bucket[RaceFields.TIME.value].min()
+            fastest_runner = runners_by_bucket[runners_by_bucket[RaceFields.TIME.value] == fastest_time]
+            results[str(bucket)] = {
+                "name": fastest_runner.iloc[0][RaceFields.NAME.value],
+                "age": int(fastest_runner.iloc[0][RaceFields.AGE.value]),
                 "time": fastest_time
             }
-    elif FastestFilters.COUNTRY:
-        countries = df[RaceFields.COUNTRY.value].unique()
-        for country in countries:
-            runners_by_country = df[(df[RaceFields.COUNTRY.value] == country)]
+    elif criteria == FastestFilters.GENDER:
+        for gender in df[RaceFields.GENDER.value].unique():
+            runners_by_gender = df[df[RaceFields.GENDER.value] == gender]
+            fastest_time = runners_by_gender[RaceFields.TIME.value].min()
+            fastest_runner = runners_by_gender[runners_by_gender[RaceFields.TIME.value] == fastest_time]
+            results[gender] = {
+                "name": fastest_runner.iloc[0][RaceFields.NAME.value],
+                "time": fastest_time
+            }
+    elif criteria == FastestFilters.COUNTRY:
+        for country in df[RaceFields.COUNTRY.value].unique():
+            runners_by_country = df[df[RaceFields.COUNTRY.value] == country]
             fastest_time = runners_by_country[RaceFields.TIME.value].min()
-            fastest_runner = runners_by_country[(runners_by_country[RaceFields.TIME.value]) == fastest_time]
-            name = fastest_runner.name.values[0]
-            country = fastest_runner.country.values[0]
+            fastest_runner = runners_by_country[runners_by_country[RaceFields.TIME.value] == fastest_time]
             results[country] = {
-                "name": name,
+                "name": fastest_runner.iloc[0][RaceFields.NAME.value],
                 "time": fastest_time
             }
     return results

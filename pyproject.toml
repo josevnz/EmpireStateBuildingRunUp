@@ -4,7 +4,6 @@ requires = [
     "wheel",
     "build>=1.2.1",
     "pip==26.0.1"
-
 ]
 build-backend = "setuptools.build_meta"
 
@@ -15,13 +14,12 @@ lint = [
 ]
 dev = [
     "textual-dev==1.8.0",
-    "twine==6.2.0",
-    "build"
+    "uv==0.11.32"
 ]
 
 [project]
 name = "EmpireStateRunUp"
-version = "2025.1.3"
+version = "2025.1.4"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -44,16 +42,21 @@ dependencies = [
     "numpy==1.26.4",
     "matplotlib==3.10.8",
     "tomlkit==0.14.0",
+    "uv"  # Add uv as a dependency
 ]
-license = {file = "LICENSE"}
+license-files = [
+    "LICENSE"
+]
+
 [project.scripts]
 esru_numbers = "empirestaterunup.runners:run_5_number"
 esru_outlier = "empirestaterunup.runners:run_outlier"
 esru_browser = "empirestaterunup.runners:run_browser"
 esru_plot = "empirestaterunup.runners:simple_plot"
-esru_server = "empirestaterunup.server:main"
 esru_enricher = "empirestaterunup.runners:run_enricher"
 
+# Remove or comment out the following line if you don't need twine
+# esru_server = "empirestaterunup.server:main"
 
 [tool.setuptools]
 include-package-data = true
@@ -82,4 +85,3 @@ select = [
     "I",
 ]
 ignore = ["E501"]
-

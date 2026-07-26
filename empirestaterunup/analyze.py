@@ -2,10 +2,9 @@
 Analyze original race results and give back canned reports
 author: Jose Vicente Nunez <kodegeek.com@protonmail.com>
 """
-import re
 from datetime import timedelta
 from enum import Enum
-from typing import Any, Dict, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -32,7 +31,7 @@ def get_5_number(criteria: str, data: DataFrame) -> DataFrame:
     return data[criteria].describe()
 
 
-def count_by_age(data: DataFrame) -> Tuple[DataFrame, Tuple[str, str]]:
+def count_by_age(data: DataFrame) -> tuple[DataFrame, tuple[str, str]]:
     """
     Counts by age
     """
@@ -40,7 +39,7 @@ def count_by_age(data: DataFrame) -> Tuple[DataFrame, Tuple[str, str]]:
     return counts.rename_axis(RaceFields.AGE.value).reset_index(name='Count'), ('Age', 'Count')
 
 
-def count_by_gender(data: DataFrame) -> Tuple[DataFrame, Tuple[str, str]]:
+def count_by_gender(data: DataFrame) -> tuple[DataFrame, tuple[str, str]]:
     """
     Counts by gender
     """
@@ -48,7 +47,7 @@ def count_by_gender(data: DataFrame) -> Tuple[DataFrame, Tuple[str, str]]:
     return counts.rename_axis(RaceFields.GENDER.value).reset_index(name='Count'), ('Gender', 'Count')
 
 
-def dt_to_sorted_dict(df: DataFrame | Series) -> Dict[str, Any]:
+def dt_to_sorted_dict(df: DataFrame | Series) -> dict[str, Any]:
     """
     Convert to sorted dict
     """
@@ -73,7 +72,7 @@ def get_outliers(df: DataFrame, column: str, std_threshold: int = 3) -> Series:
     return df[column][np.abs(z_scores) > std_threshold]
 
 
-def age_bins(df: DataFrame) -> Tuple[Categorical, Tuple[str, str]]:
+def age_bins(df: DataFrame) -> tuple[Categorical, tuple[str, str]]:
     """
     Group ages into age buckets
     """
@@ -81,7 +80,7 @@ def age_bins(df: DataFrame) -> Tuple[Categorical, Tuple[str, str]]:
     return bins.rename('Age Bucket'), ('Age', 'Count')
 
 
-def time_bins(df: DataFrame) -> Tuple[Categorical, Tuple[str, str]]:
+def time_bins(df: DataFrame) -> tuple[Categorical, tuple[str, str]]:
     """
     Group finish times into time buckets
     """
@@ -89,7 +88,7 @@ def time_bins(df: DataFrame) -> Tuple[Categorical, Tuple[str, str]]:
     return bins.rename('Time Bucket'), ('Time', 'Count')
 
 
-def get_country_counts(df: DataFrame, min_participants: int = 5, max_participants: int = 5) -> Tuple[Series, Series, Series]:
+def get_country_counts(df: DataFrame, min_participants: int = 5, max_participants: int = 5) -> tuple[Series, Series, Series]:
     """
     Gen interesting country counts
     :param df DataFrame to query
@@ -105,7 +104,7 @@ def get_country_counts(df: DataFrame, min_participants: int = 5, max_participant
     return counts, pd.concat([min_count_filter, others]), max_count_filter
 
 
-def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Any]:
+def find_fastest(df: DataFrame, criteria: FastestFilters) -> dict[str, Any]:
     """
     Find the fastest runners, per category
     :param df Dataframe to analyze

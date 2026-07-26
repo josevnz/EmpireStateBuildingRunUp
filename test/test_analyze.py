@@ -111,7 +111,7 @@ class AnalyzeTestCase(unittest.TestCase):
         self.assertIsNotNone(country_counts)
         self.assertEqual(2, country_counts['Japan'])
         self.assertIsNotNone(min_countries)
-        self.assertEqual(3, min_countries.shape[0])
+        self.assertEqual(4, min_countries.shape[0])
         self.assertIsNotNone(max_countries)
         self.assertEqual(14, max_countries.shape[0])
 

@@ -15,11 +15,8 @@ Here you will find my code.
 See the previous section called 'Packaging', and then install it on your virtual environment:
 
 ```shell
-python3 -m venv ~/virtualenv/EmpireStateRunUp
-. ~/virtualenv/EmpireStateRunUp/bin/activate
-pip install --upgrade pip
-python -m build .
-pip install --upgrade dist/EmpireStateRunUp-0.0.1-py3-none-any.whl
+uv build
+uv pip install dist/empirestaterunup-2025.1.2-py3-none-any.whl
 ```
 
 There are 4 scripts that you can run:
@@ -45,10 +42,8 @@ If you want to learn more about these programs, please grab a cup of coffe and r
 ### Running the code in developer mode
 
 ```shell
-python3 -m venv ~/virtualenv/EmpireStateRunUp
-. ~/virtualenv/EmpireStateRunUp/bin/activate
-pip install --upgrade pip
-pip install --editable .[dev,lint]
+uv pip install --editable .
+uv sync --dev
 ```
 
 #### Modifying the layout without restarting the apps
@@ -65,12 +60,7 @@ textual run --dev empirestaterunup.apps:run_outlier
 ### Packaging
 
 ```shell
-python3 -m venv ~/virtualenv/EmpireStateRunUp
-. ~/virtualenv/EmpireStateRunUp/bin/activate
-pip install --upgrade pip
-pip install --upgrade build
-pip install --upgrade wheel
-python -m build .
+uv build
 ```
 
 ### Installation from PiPy
@@ -78,15 +68,7 @@ python -m build .
 For your user:
 
 ```shell
-pip install --user EmpireStateRunUp
-```
-
-Or using a virtual environment:
-
-```shell
-python -m venv ~/virtualenv/EmpireStateRunUp && \
-.  ~/virtualenv/EmpireStateRunUp/bin/acvtivate && \
-pip install EmpireStateRunUp
+uv pip install EmpireStateRunUp
 ```
 
 #### Country codes

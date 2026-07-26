@@ -102,7 +102,7 @@ def get_country_counts(df: DataFrame, min_participants: int = 5, max_participant
     min_count_filter = counts[counts > min_participants]
     max_count_filter = counts[counts < max_participants]
     others = pd.Series({'Others': counts.sum()})
-    return counts, min_count_filter.append(others), max_count_filter
+    return counts, pd.concat([min_count_filter, others]), max_count_filter
 
 
 def find_fastest(df: DataFrame, criteria: FastestFilters) -> Dict[str, Any]:

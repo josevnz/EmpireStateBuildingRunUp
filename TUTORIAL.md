@@ -1,5 +1,7 @@
 # Data Analysis with Python – How I Analyzed My Empire State Building Run-Up Performance
 
+Readers note: This document containes outated code references, outdated installation instructions. It was written at the very early stages of this code and as a tutorial.
+
 ![empire_state_runup.png](images/empire_state_runup.png)
 
 A [tower running race](https://en.wikipedia.org/wiki/Tower_running) is run on a building and these happen around the world. The one I got a chance to participate in was the Empire State Run Up in NYC, 2013 edition:

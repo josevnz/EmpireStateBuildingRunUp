@@ -32,7 +32,7 @@ jobs:
           uv build
       - name: Analysing the Empire State Run Up code with Ruff
         run: |
-          uv run ruff check empirestaterunup
+          uv run ruff check src/empirestaterunup
           uv run ruff check test
       - name: Analysing the Empire State Run Up code with Yamllint
         run: |

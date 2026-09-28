@@ -56,7 +56,7 @@ def dt_to_sorted_dict(df: DataFrame | Series) -> dict[str, Any]:
         # For DataFrame, convert to records and sort by 'Count' column or last column
         sort_column = 'Count' if 'Count' in df.columns else df.columns[-1]
         sorted_df = df.sort_values(by=sort_column, ascending=False)
-        return dict(zip(sorted_df.iloc[:, 0], sorted_df.iloc[:, 1]))
+        return dict(zip(sorted_df.iloc[:, 0], sorted_df.iloc[:, 1], strict=True))
     else:
         # For Series, sort by values
         return dict(sorted(df.to_dict().items(), key=lambda item: item[1], reverse=True))

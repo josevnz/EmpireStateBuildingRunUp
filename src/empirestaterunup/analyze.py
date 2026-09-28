@@ -49,9 +49,17 @@ def count_by_gender(data: DataFrame) -> tuple[DataFrame, tuple[str, str]]:
 
 def dt_to_sorted_dict(df: DataFrame | Series) -> dict[str, Any]:
     """
-    Convert to sorted dict
+    Convert to sorted dict. For DataFrames, sorts by the 'Count' column if present,
+    otherwise by the last column. For Series, sorts by values.
     """
-    return dict(sorted(df.to_dict().items(), key=lambda item: item[1], reverse=True))
+    if isinstance(df, DataFrame):
+        # For DataFrame, convert to records and sort by 'Count' column or last column
+        sort_column = 'Count' if 'Count' in df.columns else df.columns[-1]
+        sorted_df = df.sort_values(by=sort_column, ascending=False)
+        return dict(zip(sorted_df.iloc[:, 0], sorted_df.iloc[:, 1], strict=True))
+    else:
+        # For Series, sort by values
+        return dict(sorted(df.to_dict().items(), key=lambda item: item[1], reverse=True))
 
 
 def get_zscore(df: DataFrame, column: str):

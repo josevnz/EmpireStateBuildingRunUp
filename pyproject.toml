@@ -62,7 +62,7 @@ esru_enricher = "empirestaterunup.runners:run_enricher"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 exclude = ["test*"]
 
 [tool.setuptools.package-data]

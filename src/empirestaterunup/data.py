@@ -7,7 +7,6 @@ import logging
 from collections import defaultdict
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
 import pandas
 import tomlkit
@@ -64,6 +63,25 @@ DEFAULT_YEAR = 2025
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
 LOCATION_DETAILS = Path(__file__).parent.joinpath("location_lookup.toml")
 
+# Pre-built country lookup dictionaries for O(1) lookups
+# These are populated on first import
+_COUNTRY_ALPHA2_MAP: dict[str, tuple[str, TOMLDocument]] = {}
+_COUNTRY_ALPHA3_MAP: dict[str, tuple[str, TOMLDocument]] = {}
+
+
+def _build_country_maps(country_data: TOMLDocument) -> None:
+    """Build alpha-2 and alpha-3 lookup maps from country data."""
+    global _COUNTRY_ALPHA2_MAP, _COUNTRY_ALPHA3_MAP
+    if not _COUNTRY_ALPHA2_MAP:  # Only build once
+        _COUNTRY_ALPHA2_MAP = {
+            details[CountryColumns.ALPHA_2.value]: (name, details)
+            for name, details in country_data.items()
+        }
+        _COUNTRY_ALPHA3_MAP = {
+            details[CountryColumns.ALPHA_3.value]: (name, details)
+            for name, details in country_data.items()
+        }
+
 
 def load_json_data(
         data_file: Path = None,
@@ -109,21 +127,22 @@ def load_json_data(
     if remove_dnf:
         df = df.loc[df.racer_has_finished, :]
 
-    # Normalize Age
+    # Normalize Age - vectorized operations
     median_age = df[RaceFields.AGE.value].median()
-    df[RaceFields.AGE.value] = df[RaceFields.AGE.value].fillna(median_age)
-    df[RaceFields.AGE.value] = df[RaceFields.AGE.value].apply(lambda x: median_age if x == 0 else x)
-    df[RaceFields.AGE.value] = df[RaceFields.AGE.value].astype(int)
+    df[RaceFields.AGE.value] = (
+        df[RaceFields.AGE.value]
+        .fillna(median_age)
+        .replace(0, median_age)
+        .astype(int)
+    )
 
-    # Normalize state and city
-    df.replace({RaceFields.STATE.value: {'-': ''}}, inplace=True)
-    df[RaceFields.STATE.value] = df[RaceFields.STATE.value].fillna('')
+    # Normalize state and city - vectorized
+    df[RaceFields.STATE.value] = df[RaceFields.STATE.value].replace({'-': ''}).fillna('')
     df[RaceFields.CITY.value] = df[RaceFields.CITY.value].fillna('')
-    for col in [
-        RaceFields.NAME.value,
-        RaceFields.CITY.value,
-    ]:
-        df[col] = df[col].apply(lambda x: x.title())
+
+    # Title case for name and city - vectorized
+    for col in [RaceFields.NAME.value, RaceFields.CITY.value]:
+        df[col] = df[col].str.title()
 
     # Flatten inner keys, ignore others
     new_cols = defaultdict(list)
@@ -137,16 +156,20 @@ def load_json_data(
         df[name] = rows
     del new_cols
 
-    # Uppercase
-    for col in [
-        RaceFields.COUNTRY.value,
-        RaceFields.GENDER.value,
-    ]:
-        df[col] = df[col].apply(lambda x: x.upper())
+    # Uppercase country and gender - vectorized
+    for col in [RaceFields.COUNTRY.value, RaceFields.GENDER.value]:
+        df[col] = df[col].str.upper()
+
+    # Load country details and build lookup maps
     country_data = load_country_details()
-    df[RaceFields.COUNTRY.value] = df[RaceFields.COUNTRY.value].apply(
-        lambda x: lookup_country_by_code(country_data=country_data, letter_code=x)[0]
-    )
+    _build_country_maps(country_data)
+
+    # Vectorized country lookup using map
+    def _lookup_country(code: str) -> str:
+        result = lookup_country_by_code(country_data=country_data, letter_code=code)
+        return result[0] if result else code
+
+    df[RaceFields.COUNTRY.value] = df[RaceFields.COUNTRY.value].map(_lookup_country)
 
     # Normalize BIB and make it the index
     df[RaceFields.BIB.value] = df[RaceFields.BIB.value].astype(int)
@@ -184,13 +207,9 @@ def df_to_list_of_tuples(
         filtered = bib_as_column
     else:
         filtered = bib_as_column[bib_as_column[RaceFields.BIB.value].isin(bibs)]
-    rows = []
-    for _, r in filtered.iterrows():
-        ind_row: list[Any] = []
-        for col in FIELD_NAMES:
-            ind_row.append(r[col])
-        tpl = tuple(ind_row)
-        rows.append(tpl)
+
+    # Use to_numpy() for faster conversion instead of iterrows
+    rows = filtered[FIELD_NAMES].to_numpy().tolist()
 
     return tuple(FIELD_NAMES), rows
 
@@ -199,11 +218,7 @@ def series_to_list_of_tuples(series: Series) -> list[tuple]:
     """
     Helper series to list of tuples
     """
-    dct = series.to_dict()
-    rows = []
-    for key, value in dct.items():
-        rows.append(tuple([key, value]))
-    return rows
+    return list(series.items())
 
 
 def load_country_details(data_file: Path = None) -> TOMLDocument:
@@ -277,17 +292,13 @@ def lookup_country_by_code(
     Returns:
         TOML document with country details, none if the lookup fails
     """
+    # Use pre-built maps for O(1) lookup
     if len(letter_code) == 3:
-        for country_name, country_details in country_data.items():
-            if letter_code == country_details[CountryColumns.ALPHA_3.value]:
-                return country_name, country_details
+        return _COUNTRY_ALPHA3_MAP.get(letter_code)
     elif len(letter_code) == 2:
-        for country_name, country_details in country_data.items():
-            if letter_code == country_details[CountryColumns.ALPHA_2.value]:
-                return country_name, country_details
+        return _COUNTRY_ALPHA2_MAP.get(letter_code)
     else:
         raise ValueError(f"Invalid letter country code: '{letter_code}'")
-    return None
 
 
 def get_times(df: DataFrame) -> DataFrame:

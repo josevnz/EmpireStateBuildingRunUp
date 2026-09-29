@@ -120,33 +120,40 @@ def find_fastest(df: DataFrame, criteria: FastestFilters) -> dict[str, Any]:
     :return Dictionary with the fastest runners, includes criteria and value
     """
     results = {}
+    time_col = RaceFields.TIME.value
+    name_col = RaceFields.NAME.value
+    age_col = RaceFields.AGE.value
+
     if criteria == FastestFilters.AGE:
-        bins = pd.cut(df[RaceFields.AGE.value], range(10, 110, 10), right=False)
-        for bucket in bins.unique():
-            runners_by_bucket = df[bins == bucket]
-            fastest_time = runners_by_bucket[RaceFields.TIME.value].min()
-            fastest_runner = runners_by_bucket[runners_by_bucket[RaceFields.TIME.value] == fastest_time]
+        # Bin ages and find fastest per bin using groupby
+        bins = pd.cut(df[age_col], range(10, 110, 10), right=False)
+        # Get index of minimum time per age bin - use observed=True to skip unobserved categories
+        fastest_idx = df.groupby(bins, observed=True)[time_col].idxmin()
+        fastest_runners = df.loc[fastest_idx]
+        for bucket, runner in fastest_runners.iterrows():
             results[str(bucket)] = {
-                "name": fastest_runner.iloc[0][RaceFields.NAME.value],
-                "age": int(fastest_runner.iloc[0][RaceFields.AGE.value]),
-                "time": fastest_time
+                "name": runner[name_col],
+                "age": int(runner[age_col]),
+                "time": runner[time_col]
             }
     elif criteria == FastestFilters.GENDER:
-        for gender in df[RaceFields.GENDER.value].unique():
-            runners_by_gender = df[df[RaceFields.GENDER.value] == gender]
-            fastest_time = runners_by_gender[RaceFields.TIME.value].min()
-            fastest_runner = runners_by_gender[runners_by_gender[RaceFields.TIME.value] == fastest_time]
+        # Find fastest per gender using groupby
+        gender_col = RaceFields.GENDER.value
+        fastest_idx = df.groupby(gender_col, observed=True)[time_col].idxmin()
+        fastest_runners = df.loc[fastest_idx]
+        for gender, runner in fastest_runners.iterrows():
             results[gender] = {
-                "name": fastest_runner.iloc[0][RaceFields.NAME.value],
-                "time": fastest_time
+                "name": runner[name_col],
+                "time": runner[time_col]
             }
     elif criteria == FastestFilters.COUNTRY:
-        for country in df[RaceFields.COUNTRY.value].unique():
-            runners_by_country = df[df[RaceFields.COUNTRY.value] == country]
-            fastest_time = runners_by_country[RaceFields.TIME.value].min()
-            fastest_runner = runners_by_country[runners_by_country[RaceFields.TIME.value] == fastest_time]
+        # Find fastest per country using groupby
+        country_col = RaceFields.COUNTRY.value
+        fastest_idx = df.groupby(country_col, observed=True)[time_col].idxmin()
+        fastest_runners = df.loc[fastest_idx]
+        for country, runner in fastest_runners.iterrows():
             results[country] = {
-                "name": fastest_runner.iloc[0][RaceFields.NAME.value],
-                "time": fastest_time
+                "name": runner[name_col],
+                "time": runner[time_col]
             }
     return results

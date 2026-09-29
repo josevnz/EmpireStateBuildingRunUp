@@ -95,18 +95,18 @@ class FiveNumberApp(App):
                 summary_table.add_columns,
                 *columns
             )
-            for metric in SUMMARY_METRICS:
-                ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
-                rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
-                rows.insert(0, metric.value.title())
-                rows[1] = int(rows[1])
-                for idx in range(2, len(rows)):  # Pretty print running times
-                    if isinstance(rows[idx], Timedelta):
-                        rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
-                self.call_from_thread(
-                    summary_table.add_row,
-                    *rows
-                )
+        for metric in SUMMARY_METRICS:
+            ndf = get_5_number(criteria=metric.value, data=FiveNumberApp.DF)
+            rows = [ndf[field] for field in FiveNumberApp.FIVE_NUMBER_FIELDS]
+            rows.insert(0, metric.value.title())
+            rows[1] = int(rows[1])
+            for idx in range(2, len(rows)):  # Pretty print running times
+                if isinstance(rows[idx], Timedelta):
+                    rows[idx] = f"{rows[idx].total_seconds() / 60.0:.2f}"
+            self.call_from_thread(
+                summary_table.add_row,
+                *rows
+            )
 
     @work(exclusive=False, thread=True)
     def update_age_table(self, age_table: DataTable) -> None:
@@ -437,7 +437,7 @@ class Plotter:
         # Legend with the fastest runners by gender
         fastest = find_fastest(self.df, FastestFilters.GENDER)
         fastest_legend = [f"{fastest[gender]['name']} - {beautify_race_times(fastest[gender]['time'])}" for gender in
-                              fastest]
+                          fastest]
         ax.legend(wedges, fastest_legend,
                   title=f"Fastest (Race year: {self.year})",
                   loc="center left",
@@ -497,14 +497,16 @@ class BrowserApp(App):
                     column.title(),
                     key=column
                 )
-        for number, row in enumerate(rows[0:], start=1):
-            label = Text(str(number), style="#B0FC38 italic")
-            self.call_from_thread(
-                table.add_row,
-                *row,
-                label=label
-            )
+        # Add rows with labels - add_rows doesn't support labels, so add individually
+        # but do it in a single thread context for efficiency
         if not worker.is_cancelled:
+            for number, row in enumerate(rows, start=1):
+                label = Text(str(number), style="#B0FC38 italic")
+                self.call_from_thread(
+                    table.add_row,
+                    *row,
+                    label=label
+                )
             self.call_from_thread(
                 table.sort,
                 RaceFields.TIME.value

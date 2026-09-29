@@ -19,7 +19,7 @@ dev = [
 
 [project]
 name = "EmpireStateRunUp"
-version = "2025.1.4"
+version = "2025.1.5"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]

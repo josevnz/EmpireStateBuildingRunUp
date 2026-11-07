@@ -132,3 +132,5 @@ dmypy.json
 .pyre/
 # Aider
 .aider*
+# CodeGraph
+.codegraph/

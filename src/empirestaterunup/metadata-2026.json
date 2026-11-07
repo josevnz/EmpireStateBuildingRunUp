@@ -1,0 +1,23 @@
+[
+ {
+  "name": "Empire State Building Observation Deck Run-Up",
+  "event_id": 93943,
+  "event_course_id": 249433,
+  "date_utc_ms": 1791331200000,
+  "distance_m": 320,
+  "split_info": [
+   {
+    "name": "Full Course",
+    "distance_m": 320
+   },
+   {
+    "name": "20th Floor",
+    "distance_m": 61
+   },
+   {
+    "name": "65th Floor",
+    "distance_m": 229
+   }
+  ]
+ }
+]

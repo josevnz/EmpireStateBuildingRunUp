@@ -23,6 +23,7 @@ BASE_RACE_DATETIME = {
     2023: datetime.datetime(year=2023, month=9, day=4, hour=20, minute=0, second=0, microsecond=0),
     2024: datetime.datetime(year=2024, month=9, day=9, hour=20, minute=0, second=0, microsecond=0),
     2025: datetime.datetime(year=2025, month=9, day=8, hour=20, minute=0, second=0, microsecond=0),
+    2026: datetime.datetime(year=2026, month=10, day=6, hour=20, minute=0, second=0, microsecond=0),
 }
 
 
@@ -57,9 +58,10 @@ FIELD_NAMES_AND_POS: dict[RaceFields, int] = {field: idx for idx, field in zip(r
 RACE_RESULTS_JSON_FULL_LEVEL = {
     2023: Path(__file__).parent.joinpath("results-2023.jsonl"),
     2024: Path(__file__).parent.joinpath("results-2024.jsonl"),
-    2025: Path(__file__).parent.joinpath("results-2025.jsonl")
+    2025: Path(__file__).parent.joinpath("results-2025.jsonl"),
+    2026: Path(__file__).parent.joinpath("results-2026.jsonl")
 }
-DEFAULT_YEAR = 2025
+DEFAULT_YEAR = 2026
 COUNTRY_DETAILS = Path(__file__).parent.joinpath("country_codes.toml")
 LOCATION_DETAILS = Path(__file__).parent.joinpath("location_lookup.toml")
 
